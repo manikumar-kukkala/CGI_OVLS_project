@@ -1,0 +1,50 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container-fluid">
+    <!-- Brand -->
+    <a class="navbar-brand" routerLink="/admin-dashboard">RTO Admin Panel</a>
+
+    <!-- Mobile Toggle -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#adminNavbar"
+      aria-controls="adminNavbar"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Collapse Content -->
+    <div class="collapse navbar-collapse" id="adminNavbar">
+      <!-- Left Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin-dashboard" routerLinkActive="active">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin-applications" routerLinkActive="active">View Applications</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/approve-licences" routerLinkActive="active">Approve Licenses</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/manage-users" routerLinkActive="active">Manage Users</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/reports" routerLinkActive="active">Reports</a>
+        </li> -->
+      </ul>
+      <!-- Right Auth Links -->
+      <ul class="navbar-nav mb-2 mb-lg-0">
+        <li class="nav-item">
+           <a class="nav-link navbar-text me-3" routerLink="/profile">👮 {{ officerName }}</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()" style="cursor: pointer;" routerLink ="/home">🚪 Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

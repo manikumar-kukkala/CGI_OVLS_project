@@ -1,0 +1,57 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2 class="register-title">Register for RTO System</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div *ngIf="error" class="error-box">{{ error }}</div>
+
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" type="text" formControlName="fullName" placeholder="Enter your full name"/>
+        <div *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid" class="form-error">
+          Full Name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" placeholder="Choose a username"/>
+        <div *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="form-error">
+          Username is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" formControlName="email" placeholder="Enter your email"/>
+        <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="form-error">
+          Valid Email is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="Enter your phone number"/>
+        <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="form-error">
+          Phone number is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="Create a password"/>
+        <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="form-error">
+          Password must be at least 6 characters
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Registering...' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="footer-text">
+      Already have an account? <a routerLink="/login">Login here</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+<!-- Navbar -->
+<app-navbar></app-navbar>
+
+<!-- Hero Section -->
+<section class="hero">
+  <h1>RTO License Management System</h1>
+  <p>Apply for your Driving License or Learner's License online. Fast, secure, and convenient.</p>
+  <div class="hero-buttons">
+    <a routerLink="/apply-licence" class="btn btn-primary">Apply Learner's License</a>
+    <a routerLink="/apply-licence" class="btn btn-secondary">Apply Driving License</a>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+  <div class="stat-card" *ngFor="let stat of stats">
+    <div class="icon">{{ stat.icon }}</div>
+    <h3>{{ stat.title }}</h3>
+    <p>{{ stat.value }}</p>
+  </div>
+</section>
+
+<!-- Process Section -->
+<section class="process">
+  <h2>Application Process</h2>
+  <div class="steps">
+    <div class="step-card" *ngFor="let step of steps">
+      <div class="step-number">{{ step.number }}</div>
+      <h4>{{ step.title }}</h4>
+      <p>{{ step.desc }}</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-col">
+      <h3>RTO License System</h3>
+      <p>Secure, fast, and easy online license management portal.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <a routerLink="/home">Home</a>
+      <a routerLink="/apply-licence">Apply License</a>
+      <a routerLink="/application-status">Check Status</a>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="#">Help Center</a>
+      <a href="#">Contact Us</a>
+      <a href="#">FAQ</a>
+      <a href="#">Guidelines</a>
+    </div>
+    <div class="footer-col social">
+      <a href="#">Facebook</a>
+      <a href="#">Twitter</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2025 RTO License System. All rights reserved.
+  </div>
+</footer>

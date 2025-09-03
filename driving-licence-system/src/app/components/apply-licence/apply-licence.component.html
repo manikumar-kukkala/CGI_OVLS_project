@@ -1,0 +1,14 @@
+<h2>Apply Licence</h2>
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <select formControlName="type">
+    <option value="learning">Learning</option>
+    <option value="permanent">Permanent</option>
+  </select>
+  <input type="text" formControlName="address" placeholder="Address" />
+  <input type="text" formControlName="identityProof" placeholder="Identity Proof" />
+  <input type="text" formControlName="addressProof" placeholder="Address Proof" />
+  <input type="text" formControlName="photo" placeholder="Photo URL" />
+  <button type="submit">Submit</button>
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+  <div *ngIf="submitted" style="color:green">Application submitted!</div>
+</form>

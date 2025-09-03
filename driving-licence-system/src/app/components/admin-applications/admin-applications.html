@@ -1,0 +1,38 @@
+<div class="container mt-4">
+  <h2 class="mb-4">📋 Applications List</h2>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of applications">
+          <td>{{ app.name }}</td>
+          <td>
+            <span class="badge"
+                  [ngClass]="{
+                    'bg-success': app.status === 'approved',
+                    'bg-danger': app.status === 'rejected',
+                    'bg-secondary': app.status !== 'approved' && app.status !== 'rejected'
+                  }">
+              {{ app.status }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-success me-2" (click)="review(app, 'approved')">
+              ✅ Approve
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="review(app, 'rejected')">
+              ❌ Reject
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

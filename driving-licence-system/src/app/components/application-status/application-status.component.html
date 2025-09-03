@@ -1,0 +1,18 @@
+<h2>Application Status</h2>
+<form [formGroup]="form" (ngSubmit)="check()">
+  <input type="text" formControlName="applicationNumber" placeholder="Application Number" />
+  <button type="submit">Check</button>
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+</form>
+
+<h3>User Applications</h3>
+<ul>
+  <li *ngFor="let app of userApps">
+    {{ app.id }} - {{ app.status }}
+  </li>
+</ul>
+
+<h3>Search Result</h3>
+<div *ngIf="searchResult">
+  {{ searchResult.id }} - {{ searchResult.status }}
+</div>

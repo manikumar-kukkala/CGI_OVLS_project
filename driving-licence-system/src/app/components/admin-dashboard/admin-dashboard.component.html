@@ -1,0 +1,98 @@
+<!-- Admin Navbar -->
+<app-admin-navbar></app-admin-navbar>
+
+<!-- Hero / Welcome Section -->
+<div class="container-fluid bg-light py-5 text-center">
+  <h1 class="display-5 fw-bold">Welcome, RTO Officer</h1>
+  <p class="lead">Manage license applications, user data, approvals, and more — all in one place.</p>
+</div>
+
+<!-- Stats Cards Section -->
+<!-- STATS CARDS -->
+<div class="container my-5">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card text-bg-warning shadow h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">📄 Pending Applications</h5>
+          <h2 class="card-text">{{ stats.pending }}</h2>
+          <button (click)="view('pending')" class="btn btn-outline-light mt-3">View All</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-bg-success shadow h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">✅ Approved Licenses</h5>
+          <h2 class="card-text">{{ stats.approved }}</h2>
+          <button (click)="view('approved')" class="btn btn-outline-light mt-3">View All</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-bg-danger shadow h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">❌ Rejected Applications</h5>
+          <h2 class="card-text">{{ stats.rejected }}</h2>
+          <button (click)="view('rejected')" class="btn btn-outline-light mt-3">View All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="container my-5">
+  <h3 class="mb-4">🔧 Quick Actions</h3>
+  <div class="row g-3">
+    <div class="col-sm-6 col-md-6">
+      <button (click)="view('pending')" class="btn btn-primary w-100">📋 View Pending</button>
+    </div>
+    <div class="col-sm-6 col-md-6">
+      <button (click)="view('approved')" class="btn btn-success w-100">✅ View Approved</button>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERED APPLICATION TABLE -->
+<div class="container mb-5" *ngIf="selectedStatus">
+  <h4 class="mb-3 text-capitalize">Showing {{ selectedStatus }} Applications</h4>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications">
+          <td>{{ app.name }}</td>
+          <td>
+            <span class="badge"
+              [ngClass]="{
+                'bg-success': app.status === 'approved',
+                'bg-danger': app.status === 'rejected',
+                'bg-warning text-dark': app.status === 'pending'
+              }">
+              {{ app.status | titlecase }}
+            </span>
+          </td>
+          <td class="text-center">
+            <button *ngIf="app.status !== 'approved'" class="btn btn-sm btn-success me-2"
+                    (click)="review(app, 'approved')">✅ Approve</button>
+            <button *ngIf="app.status !== 'rejected'" class="btn btn-sm btn-danger"
+                    (click)="review(app, 'rejected')">❌ Reject</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="d-flex justify-content-center my-3">
+  <button class="btn btn-outline-secondary" (click)="selectedStatus = null">
+    ✖ Close
+  </button>
+</div>
+
