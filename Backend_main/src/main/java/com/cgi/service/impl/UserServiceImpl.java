@@ -46,14 +46,23 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public String userLogin(String email, String password) {
-		// TODO Auto-generated method stub
-		return null;
+		return userRepository.findByEmail(email)
+                .map(existingUser -> {
+                    if (existingUser.getPassword().equals(password)) {
+                        return "Login successful for: " + existingUser.getEmail();
+                    } else {
+                        return "Invalid password for: " + existingUser.getEmail();
+                    }
+                })
+                .orElse("User not found with email: " + email);
 	}
 
 	@Override
 	public String forgotPassword(String email) {
 		// TODO Auto-generated method stub
-		return null;
+		return userRepository.findByEmail(email)
+                .map(existingUser -> "Password hint: " + existingUser.getPassword())
+                .orElse("User not found with email: " + email);
 	}
 
 	
@@ -61,7 +70,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String userLogin(User user) {
 		// TODO Auto-generated method stub
-		return null;
+		return userLogin(user.getEmail(), user.getPassword());
 	}
 	 @Override
 	    public User addUser(User user) {
@@ -74,3 +83,4 @@ public class UserServiceImpl implements UserService {
 	}
 
 }
+
