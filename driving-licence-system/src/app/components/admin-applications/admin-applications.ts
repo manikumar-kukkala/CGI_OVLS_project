@@ -1,59 +1,91 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AdminService } from '../../services/admin.service';
+import {
+  AdminService,
+  ReviewStatus,
+  Status,
+  Stats
+} from '../../services/admin.service';
+import { ApplicationRow } from '../../models/adminInterfaces';
+
+
+
+// ✅ Import the navbar component so the tag <app-admin-navbar> is known
+import { AdminNavbar } from '../admin-navbar/admin-navbar';
+
+
+type ReviewStatusLower = Lowercase<ReviewStatus>; // 'approved' | 'rejected'
 
 @Component({
   selector: 'app-admin-applications',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule,AdminNavbar],
   templateUrl: './admin-applications.html',
-  styleUrls: ['./admin-applications.scss']  // Fixed typo from styleUrl to styleUrls
+  styleUrls: ['./admin-applications.scss']
 })
 export class AdminApplications {
-  applications: any[] = [];
-  stats = {
-    pending: 0,
-    approved: 0,
-    rejected: 0,
-    total: 0
-  };
-  selectedStatus: 'pending' | 'approved' | 'rejected' | null = null;
+  applications: ApplicationRow[] = [];
+  filtered: ApplicationRow[] = [];
+  selectedStatus: Status | null = null;
+
+  stats: Stats = { pending: 0, approved: 0, rejected: 0, total: 0 };
 
   constructor(private adminService: AdminService) {}
 
   ngOnInit() {
-    this.loadStats();
-    this.loadApplications();
+    this.loadAll();
   }
 
-  loadStats() {
-    console.log("Loading stats...");
-    this.adminService.getStats().subscribe(res => {
-      this.stats = res.stats;
+  private toReviewStatus(s: ReviewStatus | ReviewStatusLower): ReviewStatus {
+    return (typeof s === 'string' ? s.toUpperCase() : s) as ReviewStatus;
+  }
+
+  private loadAll() {
+    // apps is a plain array from AdminService
+    this.adminService.getAllApplications().subscribe({
+      next: (apps) => {
+        this.applications = (apps ?? []).map(a => ({
+          ...a,
+          status: (a.status ?? 'PENDING').toString().toUpperCase() as Status
+        }));
+        this.applyFilter();
+      }
+    });
+
+    this.adminService.getStats().subscribe({
+      next: (s) => (this.stats = s)
     });
   }
-  loadApplications() {
-    this.adminService.getAllApplications().subscribe(res => {
-      this.applications = res.applications;
-    });
+
+  view(status: Status | null) {
+    this.selectedStatus = status;
+    this.applyFilter();
   }
-view(status: 'pending' | 'approved' | 'rejected') {
-  this.selectedStatus = status;
-}
+   get filteredApplications(): ApplicationRow[] {
+    return this.filtered;
+  }
 
-
-
-review(app: any, newStatus: 'approved' | 'rejected') {
-  this.adminService.reviewApplication(app.id, { status: newStatus, reviewedBy: 'admin' }).subscribe(res => {
-    console.log("Status updated:", res.application);
-    this.loadStats();
-    this.loadApplications();
-    // Reapply current filter
-    if (this.selectedStatus) {
-      this.view(this.selectedStatus);
+  private applyFilter() {
+    if (!this.selectedStatus) {
+      this.filtered = [...this.applications];
+      return;
     }
-  });
-}
+    this.filtered = this.applications.filter(a => (a.status as string) === this.selectedStatus);
+  }
 
+  review(app: ApplicationRow, newStatus: ReviewStatus | ReviewStatusLower) {
+    const id = app.applicationId ?? (app as any).id;
+    if (!id) return;
+
+    const status = this.toReviewStatus(newStatus); // -> 'APPROVED' | 'REJECTED'
+
+    this.adminService.reviewApplication(id, { status, reviewedBy: 'admin' }).subscribe({
+      next: () => {
+        app.status = status; // optimistic update
+        this.applyFilter();
+        this.adminService.getStats().subscribe(s => (this.stats = s));
+      }
+    });
+  }
 }

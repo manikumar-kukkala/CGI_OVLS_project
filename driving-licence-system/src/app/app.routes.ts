@@ -8,15 +8,25 @@ import { AdminDashboardComponent } from './components/admin-dashboard/admin-dash
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 import { AdminApplications } from './components/admin-applications/admin-applications';
+import { User } from './components/user/user';
+import { AdminRegister } from './components/admin-register/admin-register';
+import { AdminLogin } from './components/admin-login/admin-login';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'apply-licence', component: ApplyLicenceComponent ,canActivate: [AuthGuard]},
-  { path: 'application-status', component: ApplicationStatusComponent,canActivate: [AuthGuard] },
-  { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard] },
-  { path: 'admin-applications', component: AdminApplications },
 
+  // Separate User Routes
+  { path: 'login', component: LoginComponent }, // user login
+  { path: 'register', component: RegisterComponent },
+
+  { path: 'apply-licence', component: ApplyLicenceComponent, canActivate: [AuthGuard] },
+  { path: 'application-status', component: ApplicationStatusComponent, canActivate: [AuthGuard] },
+  { path: 'user', component: User, canActivate: [AuthGuard] },
+
+  // Separate Admin Routes
+  { path: 'admin-login', component: AdminLogin },        // Admin login component
+  { path: 'admin-register', component: AdminRegister },  // Admin register component
+  { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard] },
+  { path: 'admin-applications', component: AdminApplications ,canActivate: [AdminGuard] },
 ];

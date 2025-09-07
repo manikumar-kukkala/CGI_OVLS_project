@@ -1,0 +1,300 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+
+<div class="container my-5">
+
+  <!-- Step 1: Choose Action -->
+  <div *ngIf="step === 'choose'" class="text-center">
+    <h3 class="mb-4 fw-bold">Select Application Type</h3>
+    <div class="d-flex flex-column flex-md-row justify-content-center gap-3 mb-5">
+      <button class="btn btn-primary btn-lg py-3 px-5" (click)="chooseAction('learning')">Learning Licence</button>
+      <button class="btn btn-success btn-lg py-3 px-5" (click)="chooseAction('permanent')">Permanent Licence</button>
+      <!-- <button class="btn btn-warning btn-lg py-3 px-5" (click)="chooseAction('renewal')">Renewal</button> -->
+      <!-- <button class="btn btn-info btn-lg py-3 px-5 text-white" (click)="chooseAction('update')">Update Licence</button> -->
+    </div>
+  </div>
+   <!-- Step 1.5: LL reference (only for Permanent Licence) -->
+  <div *ngIf="step === 'llRef'" class="container my-5">
+    <button class="btn btn-link mb-3" (click)="step='choose'">
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+
+    <h4 class="mb-3 text-center">Enter your Learning Licence Application ID</h4>
+    <p class="text-muted text-center">
+      To continue with a Permanent Licence, we need to reference your LL application.
+    </p>
+
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6">
+        <label class="form-label">LL Application ID</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="llIdInput"
+          placeholder="e.g., APP-001" />
+        <small class="text-danger" *ngIf="llCheckError">{{ llCheckError }}</small>
+
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn btn-primary" (click)="verifyLLAndContinue()" [disabled]="verifyingLL">
+            {{ verifyingLL ? 'Verifying…' : 'Verify & Continue' }}
+          </button>
+          <button class="btn btn-secondary" (click)="step='choose'">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Form -->
+  <div *ngIf="step === 'form'">
+    <button class="btn btn-link mb-3" (click)="back()"><i class="bi bi-arrow-left"></i> Back</button>
+    <h4 class="mb-4 text-center">{{ selectedAction | titlecase }} Application</h4>
+
+    <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate>
+      <div class="row g-3">
+
+        <!-- Applicant / Document IDs -->
+        <div class="col-md-6">
+          <label class="form-label">Applicant ID (optional)</label>
+          <input type="number" class="form-control" formControlName="applicantId" placeholder="Leave empty to create a new Applicant">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Document ID (optional)</label>
+          <input type="number" class="form-control" formControlName="documentId" placeholder="Leave empty if none">
+        </div>
+
+        <!-- Optional file pickers (used only when Document ID is empty) -->
+        <div class="col-md-6">
+          <label class="form-label">Identity Proof (optional)</label>
+          <input type="file"
+                 class="form-control"
+                 (change)="onFileSelected($event, 'identityProof')"
+                 accept=".pdf,.jpg,.jpeg,.png" />
+          <small class="text-muted">PDF/JPG/PNG</small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Passport Photo (optional)</label>
+          <input type="file"
+                 class="form-control"
+                 (change)="onFileSelected($event, 'photo')"
+                 accept=".jpg,.jpeg,.png" />
+          <small class="text-muted">JPG/PNG</small>
+        </div>
+
+        <!-- UI fields (kept for display/validation; not sent to backend) -->
+        <div class="col-md-6">
+          <label class="form-label">Application Number</label>
+          <input type="text" class="form-control" formControlName="applicationNumber" placeholder="Enter unique application number">
+          <small class="text-danger" *ngIf="form.get('applicationNumber')?.touched && form.get('applicationNumber')?.hasError('required')">
+            Application Number is required
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" formControlName="name" placeholder="Enter full name">
+          <small class="text-danger" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('required')">
+            Full Name is required
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Father's Name</label>
+          <input type="text" class="form-control" formControlName="fatherName" placeholder="Enter father's name">
+          <small class="text-danger" *ngIf="form.get('fatherName')?.touched && form.get('fatherName')?.hasError('required')">
+            Father's Name is required
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Date of Birth</label>
+          <input type="date" class="form-control" formControlName="dob">
+          <small class="text-danger" *ngIf="form.get('dob')?.touched && form.get('dob')?.hasError('required')">
+            Date of Birth is required
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Gender</label>
+          <select class="form-select" formControlName="gender">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+          <small class="text-danger" *ngIf="form.get('gender')?.touched && form.get('gender')?.hasError('required')">
+            Gender is required
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Mobile Number</label>
+          <input type="tel" class="form-control" formControlName="mobile" placeholder="Enter 10-digit mobile number">
+          <small class="text-danger" *ngIf="form.get('mobile')?.touched && form.get('mobile')?.hasError('required')">
+            Mobile Number is required
+          </small>
+          <small class="text-danger" *ngIf="form.get('mobile')?.touched && form.get('mobile')?.hasError('pattern')">
+            Enter a valid 10-digit mobile number
+          </small>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" formControlName="email" placeholder="Enter email">
+          <small class="text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('required')">
+            Email is required
+          </small>
+          <small class="text-danger" *ngIf="form.get('email')?.touched && form.get('email')?.hasError('email')">
+            Enter a valid email
+          </small>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          <textarea rows="3" class="form-control" formControlName="address" placeholder="Enter address"></textarea>
+          <small class="text-danger" *ngIf="form.get('address')?.touched && form.get('address')?.hasError('required')">
+            Address is required
+          </small>
+          <div class="col-md-4">
+    <label class="form-label">State (optional)</label>
+    <input class="form-control" formControlName="state" placeholder="State">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">City (optional)</label>
+    <input class="form-control" formControlName="city" placeholder="City">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">House No. (optional)</label>
+    <input class="form-control" formControlName="house" placeholder="House / Flat">
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Landmark (optional)</label>
+    <input class="form-control" formControlName="landmark" placeholder="Landmark">
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Pincode (optional)</label>
+    <input class="form-control" formControlName="pincode" placeholder="6-digit pincode">
+  </div>
+        </div>
+
+      </div>
+
+      <div class="text-center mt-4">
+        <button type="submit" class="btn btn-success btn-lg">Submit Application</button>
+      </div>
+
+      <div *ngIf="submitted" class="alert alert-success mt-3 text-center">✅ Application submitted successfully!</div>
+      <div *ngIf="error" class="alert alert-danger mt-3 text-center">❌ {{ error }}</div>
+    </form>
+  </div>
+
+  <!-- Step 3: Appointment -->
+  <div *ngIf="step === 'appointment'" class="container my-5">
+    <h3 class="text-center mb-4 fw-bold">Select Appointment Timeslot</h3>
+    <div class="row justify-content-center g-4">
+      <div class="col-6 col-md-3" *ngFor="let slot of ['10:00 AM', '12:00 PM', '02:00 PM', '04:00 PM']">
+        <div class="card text-center shadow-sm slot-card"
+             [ngClass]="{'selected-slot': timeslot===slot}"
+             (click)="selectTimeslot(slot)">
+          <div class="card-body py-4">
+            <i class="bi bi-clock fs-2 mb-2 text-primary"></i>
+            <h5 class="card-title mb-0">{{ slot }}</h5>
+            <small class="text-success" *ngIf="timeslot===slot">Selected ✅</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button class="btn btn-success btn-lg" (click)="goToPayment()" [disabled]="!timeslot">
+        Next
+      </button>
+    </div>
+
+    <div class="text-center mt-3">
+      <button class="btn btn-link" (click)="back()"><i class="bi bi-arrow-left"></i> Back</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Payment -->
+  <div *ngIf="step === 'payment'" class="container my-5">
+    <h3 class="text-center mb-4 fw-bold">Payment</h3>
+    <p class="text-center mb-4">Payment Amount: <strong>₹500</strong></p>
+
+    <div class="row justify-content-center g-4">
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm payment-card"
+             [ngClass]="{'selected-slot': selectedPayment==='online'}"
+             (click)="selectPayment('online')">
+          <div class="card-body py-4">
+            <i class="bi bi-credit-card fs-2 mb-2 text-success"></i>
+            <h5 class="card-title mb-0">Pay Online</h5>
+            <small class="text-success" *ngIf="selectedPayment==='online'">Selected ✅</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm payment-card"
+             [ngClass]="{'selected-slot': selectedPayment==='challan'}"
+             (click)="selectPayment('challan')">
+          <div class="card-body py-4">
+            <i class="bi bi-wallet2 fs-2 mb-2 text-warning"></i>
+            <h5 class="card-title mb-0">Pay via Challan</h5>
+            <small class="text-success" *ngIf="selectedPayment==='challan'">Selected ✅</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <button
+  type="button"
+  class="btn btn-success btn-lg"
+  (click)="makePayment()"
+  [disabled]="processingPayment || !selectedPayment">
+  Confirm Payment
+</button>
+
+    </div>
+
+    <div class="text-center mt-3">
+      <button class="btn btn-link" (click)="back()"><i class="bi bi-arrow-left"></i> Back</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Done -->
+  <div *ngIf="step === 'done'" class="container my-5">
+    <h3 class="text-success mb-4 fw-bold">✅ Application Completed</h3>
+
+    <div class="card shadow-sm p-4 mb-3">
+      <h5 class="mb-3">Form Details</h5>
+      <p><strong>Application Number:</strong> {{ form.value.applicationNumber }}</p>
+      <p><strong>Full Name:</strong> {{ form.value.name }}</p>
+      <p><strong>Father's Name:</strong> {{ form.value.fatherName }}</p>
+      <p><strong>DOB:</strong> {{ form.value.dob }}</p>
+      <p><strong>Gender:</strong> {{ form.value.gender }}</p>
+      <p><strong>Mobile:</strong> {{ form.value.mobile }}</p>
+      <p><strong>Email:</strong> {{ form.value.email }}</p>
+      <p><strong>Address:</strong> {{ form.value.address }}</p>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-3">
+      <h5 class="mb-3">Appointment</h5>
+      <p><strong>Selected Timeslot:</strong> {{ timeslot }}</p>
+    </div>
+
+    <div class="card shadow-sm p-4 mb-3">
+      <h5 class="mb-3">Payment</h5>
+      <p><strong>Payment Method:</strong> {{ selectedPayment | titlecase }}</p>
+      <p><strong>Status:</strong> {{ paymentDone ? 'Completed' : 'Pending' }}</p>
+    </div>
+
+    <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+      <button class="btn btn-primary btn-lg" (click)="applyAnother()">Apply Another</button>
+      <button class="btn btn-secondary btn-lg" (click)="goHome()">Return to HomePage</button>
+      <button class="btn btn-info btn-lg" (click)="printPage()" [disabled]="!paymentDone">🖨️ Print Application</button>
+    </div>
+  </div>
+
+</div>

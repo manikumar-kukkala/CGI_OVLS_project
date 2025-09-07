@@ -1,57 +1,68 @@
-<div class="register-container">
-  <div class="register-card">
-    <h2 class="register-title">Register for RTO System</h2>
+<div class="container mt-5">
+  <div class="card mx-auto p-4 shadow" style="max-width: 500px;">
+    <h2 class="text-center mb-4">User Registration</h2>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
-      <div *ngIf="error" class="error-box">{{ error }}</div>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- Error Box -->
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
 
-      <div class="form-group">
-        <label for="fullName">Full Name</label>
-        <input id="fullName" type="text" formControlName="fullName" placeholder="Enter your full name"/>
-        <div *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid" class="form-error">
-          Full Name is required
+      <!-- Full Name -->
+      <div class="mb-3">
+        <label for="name" class="form-label">Full Name</label>
+        <input
+          id="name"
+          type="text"
+          class="form-control"
+          formControlName="name"
+          placeholder="Enter your full name"
+        />
+        <div *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="text-danger">
+          Full Name is required.
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input id="username" type="text" formControlName="username" placeholder="Choose a username"/>
-        <div *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid" class="form-error">
-          Username is required
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          class="form-control"
+          formControlName="email"
+          placeholder="Enter your email"
+        />
+        <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-danger">
+          Valid Email is required.
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input id="email" type="email" formControlName="email" placeholder="Enter your email"/>
-        <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="form-error">
-          Valid Email is required
+      <!-- Password -->
+      <div class="mb-4">
+        <label for="password" class="form-label">Password</label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          placeholder="Create a password"
+        />
+        <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-danger">
+          Password must be at least 6 characters.
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="phone">Phone Number</label>
-        <input id="phone" type="tel" formControlName="phone" placeholder="Enter your phone number"/>
-        <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="form-error">
-          Phone number is required
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password" type="password" formControlName="password" placeholder="Create a password"/>
-        <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="form-error">
-          Password must be at least 6 characters
-        </div>
-      </div>
-
-      <button type="submit" [disabled]="isSubmitting">
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary w-100" [disabled]="isSubmitting">
         {{ isSubmitting ? 'Registering...' : 'Register' }}
       </button>
     </form>
 
-    <div class="footer-text">
-      Already have an account? <a routerLink="/login">Login here</a>
+    <!-- Footer -->
+    <div class="text-center mt-3">
+      Already have an account?
+      <a routerLink="/login">Login here</a>
     </div>
   </div>
 </div>

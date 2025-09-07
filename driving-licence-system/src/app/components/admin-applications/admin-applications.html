@@ -1,35 +1,57 @@
-<div class="container mt-4">
-  <h2 class="mb-4">📋 Applications List</h2>
+<!-- Admin Navbar -->
+<app-admin-navbar></app-admin-navbar>
+
+<div class="container my-4">
+  <h2 class="mb-3 fw-bold d-flex align-items-center">
+    <span class="me-2">📋</span> Applications List
+  </h2>
 
   <div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover align-middle">
+    <table class="table table-hover table-striped align-middle">
       <thead class="table-dark">
         <tr>
-          <th>Name</th>
-          <th>Status</th>
-          <th class="text-center">Actions</th>
+          <th style="min-width: 260px;">Name</th>
+          <th style="min-width: 140px;">Status</th>
+          <th class="text-center" style="min-width: 220px;">Actions</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngFor="let app of applications">
-          <td>{{ app.name }}</td>
+        <tr *ngFor="let app of filteredApplications">
           <td>
-            <span class="badge"
+            {{ 
+              app?.applicationNumber
+             }}
+          </td>
+
+          <td>
+            <span class="badge px-3 py-2 text-capitalize"
                   [ngClass]="{
-                    'bg-success': app.status === 'approved',
-                    'bg-danger': app.status === 'rejected',
-                    'bg-secondary': app.status !== 'approved' && app.status !== 'rejected'
+                    'bg-success':  app.status === 'APPROVED',
+                    'bg-danger':   app.status === 'REJECTED',
+                    'bg-secondary':app.status === 'PENDING'
                   }">
-              {{ app.status }}
+              {{ (app.status || 'PENDING') | lowercase }}
             </span>
           </td>
+
           <td class="text-center">
-            <button class="btn btn-sm btn-success me-2" (click)="review(app, 'approved')">
-              ✅ Approve
+            <button class="btn btn-sm btn-success me-2"
+                    (click)="review(app, 'approved')">
+              <i class="bi bi-check-square me-1"></i> Approve
             </button>
-            <button class="btn btn-sm btn-danger" (click)="review(app, 'rejected')">
-              ❌ Reject
+
+            <button class="btn btn-sm btn-danger"
+                    (click)="review(app, 'rejected')">
+              <i class="bi bi-x-square me-1"></i> Reject
             </button>
+          </td>
+        </tr>
+
+        <!-- Empty state -->
+        <tr *ngIf="filteredApplications.length === 0">
+          <td colspan="3" class="text-center text-muted py-4">
+            No applications found.
           </td>
         </tr>
       </tbody>

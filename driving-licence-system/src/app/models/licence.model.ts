@@ -1,19 +1,47 @@
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 export type LicenceType = 'learning' | 'permanent';
 
-export interface Application {
-  id: string;
-  userId: string;
-  type: LicenceType;
-  address: string;
-  identityProof: string;
-  addressProof: string;
-  photo: string;
+export type AppStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export interface ApplicationSummary {
+  applicationId: number;
   applicationNumber: string;
-  status: ApplicationStatus;
-  comments?: string;
-  createdAt?: string;
+  status: AppStatus;
+  paymentStatus: string;
+  modeOfPayment: string;
+  applicationDate: string;
 }
+
+export interface Application {
+  applicationNumber: string;
+  applicationDate: string;
+  modeOfPayment: string;
+  paymentStatus: string;
+  remarks: string;
+  status: string;
+ applicant: { applicantId?: number; learnerLicenseStatus?: string; drivingLicenseStatus?: string };
+  documents?: { documentId?: number; idProof?: string | null; photo?: string | null; addressProof?: string | null } | null;
+  
+}
+
+
+export interface Applicant {
+  applicantId?: number;           // optional: new applicant won’t have an id yet
+  name: string;
+  fatherName: string;
+  dob: string;                    // 'yyyy-MM-dd'
+  gender: string;
+  mobile: string;
+  email: string;
+  address: string;
+}
+
+export interface Documents {
+  documentId?: number;            // optional
+  idProof?: string | null;        // store filename or base64 string
+  addressProof?: string | null;   // optional (not in your form)
+  photo?: string | null;          // store filename or base64 string
+}
+
 
 export interface InsertApplication {
   type: LicenceType;

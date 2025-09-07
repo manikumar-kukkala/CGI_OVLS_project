@@ -1,13 +1,10 @@
 export type Role = 'user' | 'admin';
 
 export interface User {
-  id: string;
-  username: string;
+  id: number;
+  name: string;
   email: string;
-  fullName: string;
-  phone: string;
-  role: Role;
-  createdAt?: string;
+  password: string;
 }
 
 export interface RegisterRequest {

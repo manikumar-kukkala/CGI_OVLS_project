@@ -56,7 +56,8 @@
 
 <!-- FILTERED APPLICATION TABLE -->
 <div class="container mb-5" *ngIf="selectedStatus">
-  <h4 class="mb-3 text-capitalize">Showing {{ selectedStatus }} Applications</h4>
+  <h4 class="mb-3 text-capitalize">Showing {{ selectedStatus | lowercase }} Applications</h4>
+
   <div class="table-responsive">
     <table class="table table-bordered table-striped table-hover align-middle">
       <thead class="table-dark">
@@ -68,31 +69,33 @@
       </thead>
       <tbody>
         <tr *ngFor="let app of filteredApplications">
-          <td>{{ app.name }}</td>
+          <td>{{ app?.applicationNumber }}</td>
+
           <td>
             <span class="badge"
-              [ngClass]="{
-                'bg-success': app.status === 'approved',
-                'bg-danger': app.status === 'rejected',
-                'bg-warning text-dark': app.status === 'pending'
-              }">
-              {{ app.status | titlecase }}
+                  [ngClass]="{
+                    'bg-success': app.status === 'APPROVED',
+                    'bg-danger':  app.status === 'REJECTED',
+                    'bg-warning text-dark': app.status === 'PENDING'
+                  }">
+              {{ app.status | lowercase }}
             </span>
           </td>
+
           <td class="text-center">
-            <button *ngIf="app.status !== 'approved'" class="btn btn-sm btn-success me-2"
+            <button *ngIf="app.status !== 'APPROVED'"
+                    class="btn btn-sm btn-success me-2"
                     (click)="review(app, 'approved')">✅ Approve</button>
-            <button *ngIf="app.status !== 'rejected'" class="btn btn-sm btn-danger"
+            <button *ngIf="app.status !== 'REJECTED'"
+                    class="btn btn-sm btn-danger"
                     (click)="review(app, 'rejected')">❌ Reject</button>
           </td>
+        </tr>
+
+        <tr *ngIf="filteredApplications.length === 0">
+          <td colspan="3" class="text-center text-muted py-4">No applications found.</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
-<div class="d-flex justify-content-center my-3">
-  <button class="btn btn-outline-secondary" (click)="selectedStatus = null">
-    ✖ Close
-  </button>
-</div>
-

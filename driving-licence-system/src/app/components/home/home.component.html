@@ -6,10 +6,140 @@
   <h1>RTO License Management System</h1>
   <p>Apply for your Driving License or Learner's License online. Fast, secure, and convenient.</p>
   <div class="hero-buttons">
-    <a routerLink="/apply-licence" class="btn btn-primary">Apply Learner's License</a>
-    <a routerLink="/apply-licence" class="btn btn-secondary">Apply Driving License</a>
+    <a routerLink="/user" class="btn btn-primary">Apply Learner's License</a>
+    <a routerLink="/user" class="btn btn-secondary">Apply Driving License</a>
   </div>
 </section>
+
+<!-- Latest application status -->
+<div class="container mt-4" *ngIf="!loadingLatest">
+  <ng-container *ngIf="latest as l; else noApp">
+    <div class="alert d-flex justify-content-between align-items-start"
+         [ngClass]="{
+           'alert-warning': l.status === 'PENDING',
+           'alert-success': l.status === 'APPROVED',
+           'alert-danger' : l.status === 'REJECTED'
+         }">
+      <div>
+        <h5 class="mb-1">Your latest application</h5>
+
+        <div class="mb-1">
+          <strong>No:</strong> {{ l.applicationNumber }}
+          <span class="badge ms-2"
+                [ngClass]="{
+                  'bg-success': l.status === 'APPROVED',
+                  'bg-danger' : l.status === 'REJECTED',
+                  'bg-warning text-dark': l.status === 'PENDING'
+                }">
+            {{ l.status | titlecase }}
+          </span>
+        </div>
+
+        <small class="text-muted">
+          Submitted: {{ l.applicationDate | date:'mediumDate' }}
+          • Payment: {{ l.paymentStatus || '-' }}
+        </small>
+      </div>
+
+      <a class="btn btn-sm btn-outline-dark"
+         [routerLink]="['/application-status']"
+         [queryParams]="{ app: l.applicationNumber }">
+        View details
+      </a>
+    </div>
+  </ng-container>
+
+  <ng-template #noApp>
+    <!-- <div class="alert alert-info">You haven’t submitted any applications yet.</div> -->
+  </ng-template>
+</div>
+<!-- END Latest application status -->
+
+<!-- ===== Search (by Application # or Email) ===== -->
+<div class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="mb-3">🔍 Find your application</h4>
+
+      <form (ngSubmit)="runSearch()" class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Search by</label>
+          <select class="form-select" [(ngModel)]="searchBy" name="searchBy">
+            <option value="number">Application #</option>
+            <option value="email">Email</option>
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Enter {{ searchBy === 'number' ? 'Application #' : 'Email' }}</label>
+          <input class="form-control"
+                 [(ngModel)]="query"
+                 name="query"
+                 [placeholder]="searchBy === 'number' ? 'e.g. APP-001' : 'e.g. user@example.com'"
+                 required />
+        </div>
+
+        <div class="col-12 col-md-2 d-grid">
+          <button class="btn btn-primary" type="submit" [disabled]="searching">Search</button>
+        </div>
+      </form>
+
+      <div *ngIf="searchError" class="alert alert-danger mt-3">{{ searchError }}</div>
+    </div>
+  </div>
+
+  <!-- Result (single row) -->
+  <div class="table-responsive mt-3" *ngIf="searchResult">
+    <table class="table table-bordered table-striped table-hover align-middle">
+      <thead class="table-dark">
+      <tr>
+        <th>Application #</th>
+        <th>Submitted On</th>
+        <th>Status</th>
+        <th>Payment</th>
+        <th class="text-center">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="fw-semibold">{{ searchResult.applicationNumber }}</td>
+        <td>{{ searchResult.applicationDate | date: 'mediumDate' }}</td>
+        <td>
+          <span class="badge"
+                [ngClass]="{
+                  'bg-success'           : searchResult.status === 'APPROVED',
+                  'bg-danger'            : searchResult.status === 'REJECTED',
+                  'bg-warning text-dark' : searchResult.status === 'PENDING'
+                }">
+            {{ searchResult.status | titlecase }}
+          </span>
+        </td>
+        <td>
+          <span class="badge"
+                [ngClass]="{
+                  'bg-success'   : (searchResult.paymentStatus || '').toLowerCase() === 'completed',
+                  'bg-secondary' : (searchResult.paymentStatus || '').toLowerCase() !== 'completed'
+                }">
+            {{ searchResult.paymentStatus || 'Pending' }}
+          </span>
+        </td>
+        <td class="text-center">
+          <a class="btn btn-sm btn-outline-primary"
+             [routerLink]="['/application-status']"
+             [queryParams]="{ app: searchResult.applicationNumber }">
+            View details
+          </a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="searched && !searchResult && !searching" class="alert alert-warning mt-3">
+    No application found for "<strong>{{ query }}</strong>".
+  </div>
+</div>
+<!-- ===== End Search ===== -->
 
 <!-- Stats Section -->
 <section class="stats">
@@ -42,7 +172,7 @@
     <div class="footer-col">
       <h4>Quick Links</h4>
       <a routerLink="/home">Home</a>
-      <a routerLink="/apply-licence">Apply License</a>
+      <a routerLink="/user">Apply License</a>
       <a routerLink="/application-status">Check Status</a>
     </div>
     <div class="footer-col">

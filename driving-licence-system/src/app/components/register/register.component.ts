@@ -1,9 +1,11 @@
+
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterModule ,ActivatedRoute} from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+//import { RTOOfficer } from '../../models/adminInterfaces';
+import { CommonModule } from '@angular/common';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-register',
@@ -13,41 +15,44 @@ import { Router } from '@angular/router';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-  registerForm!: FormGroup;
-  error: string = '';
-  isSubmitting: boolean = false;
+ registerForm!: FormGroup;
+  isSubmitting = false;
+  error = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private fb: FormBuilder, private router: Router, private authService: AuthService,  private route: ActivatedRoute,) {}
 
   ngOnInit(): void {
+
+    this.initForm();
+  }
+
+  
+  initForm() {
     this.registerForm = this.fb.group({
-      fullName: ['', Validators.required],
-      username: ['', Validators.required],
+      name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
+onSubmit() {
+  this.error = '';
+  if (this.registerForm.invalid) return;
 
-  onSubmit() {
-    this.error = '';
-    if (this.registerForm.invalid) return;
+  this.isSubmitting = true;
 
-    this.isSubmitting = true;
+  const userData : User= this.registerForm.value;
 
-    this.authService.register(this.registerForm.value).subscribe({
-      next: (res: any) => {
-        alert(`Welcome to RTO System, ${res.user.fullName}!`);
-        this.router.navigate(['/login']);
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Registration failed';
-        this.isSubmitting = false;
-      }
-    });
-  }
+  this.authService.registerUser(userData).subscribe({
+    next: (response) => {
+      console.log('User Registered (saved to DB):', response);
+      this.isSubmitting = false;
+      this.router.navigateByUrl('/login'); // Navigate after successful registration
+    },
+    error: (err) => {
+      console.error('Error during registration:', err);
+      this.error = 'Registration failed. Please try again.';
+      this.isSubmitting = false;
+    }
+  });
+}
 }

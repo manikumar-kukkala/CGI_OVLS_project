@@ -1,0 +1,94 @@
+.card {
+  border-radius: 15px;
+}
+
+.card-header {
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.form-label {
+  font-weight: 500;
+}
+
+.btn-lg {
+  min-width: 180px;
+}
+
+.text-center h3 {
+  font-size: 1.8rem;
+}
+
+.alert {
+  font-weight: 500;
+}
+.step-item {
+  position: relative;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.step-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.step-item.active {
+  border: 2px solid #0d6efd;
+  background-color: #f8f9fa;
+  transform: translateY(-5px);
+}
+
+.step-icon span {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.step-item::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 30px;
+  height: 2px;
+  background-color: #dee2e6;
+  transform: translateY(-50%);
+}
+
+.step-item:last-child::after {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .step-item::after {
+    display: none;
+  }
+}
+
+.slot-card {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
+}
+
+.slot-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.selected-slot {
+  border: 2px solid #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.disabled-slot {
+  opacity: 0.5;
+  pointer-events: none;
+}
