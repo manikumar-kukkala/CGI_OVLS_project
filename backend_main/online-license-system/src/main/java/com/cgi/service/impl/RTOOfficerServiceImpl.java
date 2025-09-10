@@ -171,4 +171,3 @@ public RTOOfficer addOfficer(RTOOfficer officer) {
         throw new UnsupportedOperationException("Unimplemented method 'findById'");
     }
 }
-
