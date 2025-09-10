@@ -61,6 +61,7 @@
           <label class="form-label">Document ID (optional)</label>
           <input type="number" class="form-control" formControlName="documentId" placeholder="Leave empty if none">
         </div>
+        
 
         <!-- Optional file pickers (used only when Document ID is empty) -->
         <div class="col-md-6">
@@ -92,8 +93,8 @@
 
         <div class="col-md-6">
           <label class="form-label">Full Name</label>
-          <input type="text" class="form-control" formControlName="name" placeholder="Enter full name">
-          <small class="text-danger" *ngIf="form.get('name')?.touched && form.get('name')?.hasError('required')">
+          <input type="text" class="form-control" formControlName="applicantName" placeholder="Enter full name">
+          <small class="text-danger" *ngIf="form.get('applicantName')?.touched && form.get('applicantName')?.hasError('required')">
             Full Name is required
           </small>
         </div>
@@ -107,12 +108,18 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Date of Birth</label>
-          <input type="date" class="form-control" formControlName="dob">
-          <small class="text-danger" *ngIf="form.get('dob')?.touched && form.get('dob')?.hasError('required')">
-            Date of Birth is required
-          </small>
-        </div>
+  <label class="form-label">Date of Birth</label>
+  <input type="date" class="form-control" formControlName="dob">
+  
+  <small class="text-danger" *ngIf="form.get('dob')?.touched && form.get('dob')?.hasError('required')">
+    Date of Birth is required
+  </small>
+
+  <small class="text-danger" *ngIf="form.get('dob')?.touched && form.get('dob')?.hasError('underage')">
+    You must be 18 years or older to apply
+  </small>
+</div>
+
 
         <div class="col-md-6">
           <label class="form-label">Gender</label>
