@@ -6,7 +6,7 @@ import {
   Application, InsertApplication, ApplicationStatusRequest,
   ApplicationSummary
 } from '../models/licence.model';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class LicenceService {
@@ -19,8 +19,18 @@ export class LicenceService {
   }
 
   submitApplication(data: InsertApplication, userId: string): Observable<{ application: Application }> {
-    return this.http.post<{ application: Application }>(`${this.base}/api/applications`, { ...data, userId });
-  }
+  // First fetch applicant by userId
+  return this.http.get<any>(`${this.base}/applicants/by-user/${userId}`).pipe(
+    switchMap((applicant: any) => {
+      const applicantId = applicant?.applicantId;
+      if (!applicantId) throw new Error('Applicant not found for this user');
+
+      const payload = { ...data, applicantId }; // ✅ use applicantId, not userId
+      return this.http.post<{ application: Application }>(`${this.base}/applications`, payload);
+    })
+  );
+}
+
 
   getUserApplications(userId: string): Observable<{ applications: Application[] }> {
     return this.http.get<{ applications: Application[] }>(`${this.base}/api/applications/user/${userId}`);
