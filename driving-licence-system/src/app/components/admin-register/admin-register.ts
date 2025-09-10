@@ -25,12 +25,14 @@ export class AdminRegister implements OnInit {
   }
 
   initForm() {
-    this.registerForm = this.fb.group({
-      username: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
-  }
+  this.registerForm = this.fb.group({
+    username: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+   // rtoId: ['', Validators.required]  // ✅ flatten, not nested
+  });
+}
+
 
 onSubmit() {
   this.error = '';
@@ -38,13 +40,13 @@ onSubmit() {
 
   this.isSubmitting = true;
 
-  const officerData : RTOOfficer= this.registerForm.value;
+  const officerData: RTOOfficer = this.registerForm.value; // now matches backend
 
   this.adminService.addOfficer(officerData).subscribe({
     next: (response) => {
-      console.log('Admin Registered (saved to DB):', response);
+      console.log('Admin Registered:', response);
       this.isSubmitting = false;
-      this.router.navigateByUrl('/admin-login'); // Navigate after successful registration
+      this.router.navigateByUrl('/admin-login');
     },
     error: (err) => {
       console.error('Error during registration:', err);
@@ -53,4 +55,8 @@ onSubmit() {
     }
   });
 }
+
+
+
 }
+
