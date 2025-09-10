@@ -103,3 +103,4 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentRepository.save(appt));
     }
 }
+
