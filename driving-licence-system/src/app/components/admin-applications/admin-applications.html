@@ -11,6 +11,7 @@
       <thead class="table-dark">
         <tr>
           <th style="min-width: 260px;">Name</th>
+          <th style="min-width: 180px;">Application Number</th>
           <th style="min-width: 140px;">Status</th>
           <th class="text-center" style="min-width: 220px;">Actions</th>
         </tr>
@@ -18,12 +19,13 @@
 
       <tbody>
         <tr *ngFor="let app of filteredApplications">
-          <td>
-            {{ 
-              app?.applicationNumber
-             }}
-          </td>
+          <!-- Name -->
+          <td>{{ app?.applicantName}}</td>
 
+          <!-- Application Number -->
+          <td>{{ app?.applicationNumber }}</td>
+
+          <!-- Status -->
           <td>
             <span class="badge px-3 py-2 text-capitalize"
                   [ngClass]="{
@@ -35,6 +37,7 @@
             </span>
           </td>
 
+          <!-- Actions -->
           <td class="text-center">
             <button class="btn btn-sm btn-success me-2"
                     (click)="review(app, 'approved')">
@@ -50,7 +53,7 @@
 
         <!-- Empty state -->
         <tr *ngIf="filteredApplications.length === 0">
-          <td colspan="3" class="text-center text-muted py-4">
+          <td colspan="4" class="text-center text-muted py-4">
             No applications found.
           </td>
         </tr>
@@ -58,3 +61,4 @@
     </table>
   </div>
 </div>
+
