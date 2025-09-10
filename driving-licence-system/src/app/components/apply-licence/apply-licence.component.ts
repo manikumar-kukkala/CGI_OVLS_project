@@ -19,6 +19,7 @@ export class ApplyLicenceComponent implements OnInit {
 
   ngOnInit() {
     this.form = this.fb.group({
+       applicantName: ['', Validators.required], 
       type: ['learning', Validators.required],
       address: ['', Validators.required],
       identityProof: ['', Validators.required],
