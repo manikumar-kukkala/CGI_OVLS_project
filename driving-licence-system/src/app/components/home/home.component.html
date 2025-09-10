@@ -66,12 +66,11 @@
           <label class="form-label">Search by</label>
           <select class="form-select" [(ngModel)]="searchBy" name="searchBy">
             <option value="number">Application #</option>
-            <option value="email">Email</option>
           </select>
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label">Enter {{ searchBy === 'number' ? 'Application #' : 'Email' }}</label>
+          <label class="form-label">Enter {{ searchBy === 'number' ? 'Application #}}</label>
           <input class="form-control"
                  [(ngModel)]="query"
                  name="query"
@@ -94,6 +93,7 @@
       <thead class="table-dark">
       <tr>
         <th>Application #</th>
+        <th>Name</th>
         <th>Submitted On</th>
         <th>Status</th>
         <th>Payment</th>
@@ -103,6 +103,7 @@
       <tbody>
       <tr>
         <td class="fw-semibold">{{ searchResult.applicationNumber }}</td>
+        <td class="fw-semibold">{{ searchResult.applicantName}}</td>
         <td>{{ searchResult.applicationDate | date: 'mediumDate' }}</td>
         <td>
           <span class="badge"
