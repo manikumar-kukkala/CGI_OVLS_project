@@ -7,6 +7,8 @@ export interface RTOOffice{
 }
 export interface RTOOfficer{
     username: string;
+   // rtoOffice:string;
+    //rtoId:Int16Array;
     password: string;
     email: string;
 }
@@ -30,6 +32,7 @@ export interface Login{
 export interface ApplicationRow {
   applicationId: number;
   applicationNumber?: string;
+  applicantName?: string;
   status: Status | string; // backend may send plain string; we normalize in UI
   applicant?: {
     user?: { name?: string; email?: string };
