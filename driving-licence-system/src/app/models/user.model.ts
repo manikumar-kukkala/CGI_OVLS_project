@@ -22,6 +22,7 @@ export interface LoginRequest {
 }
 
 export interface Application{
+  applicantName: string;
     applicationId: number;
     applicationDate: Date;
     modeOfPayment: string;
