@@ -115,11 +115,11 @@ public ResponseEntity<Application> createApplication(@RequestBody Application ap
     }
 
     @GetMapping("/status/latest/by-user/{userId}")
-    public ResponseEntity<ApplicationRepository.LatestStatus> latestStatusByUser(@PathVariable Long userId) {
-        ApplicationRepository.LatestStatus view = applicationRepository
-                .findTopByApplicant_User_IdOrderByApplicationIdDesc(userId);
-        return (view == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(view);
-    }
+public ResponseEntity<ApplicationRepository.LatestStatus> latestStatusByUser(@PathVariable Long userId) {
+    ApplicationRepository.LatestStatus view = applicationRepository.findLatestByUserId(userId);
+    return (view == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(view);
+}
+
 
     @GetMapping("/by-number/{number}")
     public ResponseEntity<Application> byNumber(@PathVariable String number) {
@@ -142,9 +142,10 @@ public ResponseEntity<Application> createApplication(@RequestBody Application ap
     // 4) NEW (tiny): Provide GET /applications so your Angular fallback stops
     // getting 405.
     @GetMapping
-    public List<Application> listAll() {
-        return applicationRepository.findAll();
-    }
+public List<ApplicationRepository.LatestStatus> listAll() {
+    return applicationRepository.findAllWithApplicantName();
+}
+
 
     // --- DTO for payment patch ---
     public static class PaymentPatch {
@@ -169,4 +170,3 @@ public ResponseEntity<Application> createApplication(@RequestBody Application ap
         return ResponseEntity.ok(applicationRepository.save(app));
     }
 }
-
