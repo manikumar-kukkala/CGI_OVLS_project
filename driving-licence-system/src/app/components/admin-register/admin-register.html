@@ -22,6 +22,24 @@
           Full Name is required.
         </div>
       </div>
+     <!-- RTO Office ID -->
+<!--
+     <div class="mb-3" formGroupName="rtoOffice">
+  <label for="rtoOfficeId" class="form-label">RTO Office ID</label>
+  <input
+    id="rtoOfficeId"
+    type="number"
+    class="form-control"
+    formControlName="rtoId"
+    placeholder="Enter RTO Office ID"
+  />
+  <div *ngIf="registerForm.get('rtoOffice.rtoId')?.touched && registerForm.get('rtoOffice.rtoId')?.invalid" class="text-danger">
+    RTO Office ID is required.
+  </div>
+</div>
+-->
+
+
 
       <!-- Email -->
       <div class="mb-3">
@@ -66,3 +84,4 @@
     </div>
   </div>
 </div>
+
