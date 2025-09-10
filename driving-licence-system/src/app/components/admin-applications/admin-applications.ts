@@ -41,22 +41,24 @@ export class AdminApplications {
     return (typeof s === 'string' ? s.toUpperCase() : s) as ReviewStatus;
   }
 
-  private loadAll() {
-    // apps is a plain array from AdminService
-    this.adminService.getAllApplications().subscribe({
-      next: (apps) => {
-        this.applications = (apps ?? []).map(a => ({
-          ...a,
-          status: (a.status ?? 'PENDING').toString().toUpperCase() as Status
-        }));
-        this.applyFilter();
-      }
-    });
+ private loadAll() {
+  this.adminService.getAllApplications().subscribe({
+    next: (apps) => {
+      this.applications = (apps ?? []).map(a => ({
+        ...a,
+        applicantName: a.applicantName ?? 'Unknown', // <-- map backend field
+        status: (a.status ?? 'PENDING').toString().toUpperCase() as Status
+      }));
+      this.applyFilter();
+    }
+  });
 
-    this.adminService.getStats().subscribe({
-      next: (s) => (this.stats = s)
-    });
-  }
+  this.adminService.getStats().subscribe({
+    next: (s) => (this.stats = s)
+  });
+}
+
+
 
   view(status: Status | null) {
     this.selectedStatus = status;
@@ -89,3 +91,4 @@ export class AdminApplications {
     });
   }
 }
+
