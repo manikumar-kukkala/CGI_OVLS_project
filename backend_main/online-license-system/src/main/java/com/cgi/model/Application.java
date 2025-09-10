@@ -8,9 +8,15 @@ public class Application {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long applicationId; // Changed from int to Long ✅
+    private Long applicationId;
+
     @Column(unique = true, nullable = false)
     private String applicationNumber;
+
+    @Transient 
+     @Column(name = "applicant_name") 
+    private String applicantName;
+
     private String applicationDate;
     private String modeOfPayment;
     private String paymentStatus;
@@ -18,7 +24,7 @@ public class Application {
     private String status;
 
     // Relationships
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "applicant_id")
     private Applicant applicant;
 
@@ -30,10 +36,11 @@ public class Application {
     public Application() {
     }
 
-    public Application(String applicationNumber, String applicationDate,
-            String modeOfPayment, String paymentStatus, String remarks,
-            Applicant applicant, Documents documents, String status) {
+    public Application(String applicationNumber, String applicantName, String applicationDate,
+                       String modeOfPayment, String paymentStatus, String remarks,
+                       Applicant applicant, Documents documents, String status) {
         this.applicationNumber = applicationNumber;
+        this.applicantName = applicantName;
         this.applicationDate = applicationDate;
         this.modeOfPayment = modeOfPayment;
         this.paymentStatus = paymentStatus;
@@ -42,17 +49,6 @@ public class Application {
         this.documents = documents;
         this.status = status;
     }
-
-    // public Application(String applicationNumber, String applicationDate,
-    // String modeOfPayment, String paymentStatus, String remarks,
-    // String status) {
-    // this.applicationNumber = applicationNumber;
-    // this.applicationDate = applicationDate;
-    // this.modeOfPayment = modeOfPayment;
-    // this.paymentStatus = paymentStatus;
-    // this.remarks = remarks;
-    // this.status = status;
-    // }
 
     // Getters & Setters
     public Long getApplicationId() {
@@ -69,6 +65,16 @@ public class Application {
 
     public void setApplicationNumber(String applicationNumber) {
         this.applicationNumber = applicationNumber;
+    }
+
+    public String getApplicantName() {
+        // derive from applicant → user
+        return applicantName;
+    }
+
+    public void setApplicantName(String applicantName) {
+        // not persisted, just to satisfy JSON setter
+        this.applicantName = applicantName;
     }
 
     public String getApplicationDate() {
@@ -127,3 +133,4 @@ public class Application {
         this.status = status;
     }
 }
+
