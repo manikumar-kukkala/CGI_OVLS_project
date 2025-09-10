@@ -135,14 +135,16 @@ export class HomeComponent implements OnInit {
   }
 
   // ===== Normalizer -> ApplicationSummary =====
-  private readonly toSummary = (a: any): ApplicationSummary => ({
-    applicationId:     a?.applicationId ?? a?.id ?? 0,
-    applicationNumber: a?.applicationNumber ?? '-',
-    status:            (a?.status ?? 'PENDING').toString().toUpperCase() as AppStatus,
-    paymentStatus:     a?.paymentStatus ?? 'Pending',
-    modeOfPayment:     a?.modeOfPayment ?? '-',
-    applicationDate:   a?.applicationDate ?? new Date().toISOString()
-  });
+ private readonly toSummary = (a: any): ApplicationSummary => ({
+  applicationId: a.applicationId,
+  applicationNumber: a.applicationNumber,
+  applicantName: a.applicantName,  // <-- add this
+  status: a.status,
+  paymentStatus: a.paymentStatus,
+  modeOfPayment: a.modeOfPayment,
+  applicationDate: a.applicationDate
+});
+
 
   // ---- Your existing static content ----
   stats = [
