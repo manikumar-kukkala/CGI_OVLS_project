@@ -5,6 +5,7 @@ export type AppStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export interface ApplicationSummary {
   applicationId: number;
   applicationNumber: string;
+  applicantName :string;
   status: AppStatus;
   paymentStatus: string;
   modeOfPayment: string;
@@ -12,16 +13,26 @@ export interface ApplicationSummary {
 }
 
 export interface Application {
+  applicationId?: number;
   applicationNumber: string;
   applicationDate: string;
   modeOfPayment: string;
   paymentStatus: string;
   remarks: string;
   status: string;
- applicant: { applicantId?: number; learnerLicenseStatus?: string; drivingLicenseStatus?: string };
-  documents?: { documentId?: number; idProof?: string | null; photo?: string | null; addressProof?: string | null } | null;
-  
+
+  // NEW fields added to match backend
+  applicantName: string;
+  fatherName?: string;
+  dob?: string;
+  gender?: string;
+  address?: string;
+  type?:string;
+
+  applicant?: any; // keep as before
+  documents?: any; // keep as before
 }
+
 
 
 export interface Applicant {
