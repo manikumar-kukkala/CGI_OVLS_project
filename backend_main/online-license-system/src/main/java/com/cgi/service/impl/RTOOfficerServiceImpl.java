@@ -4,6 +4,7 @@ import com.cgi.model.Applicant;
 import com.cgi.model.Application;
 import com.cgi.model.Appointment;
 import com.cgi.model.DrivingLicense;
+import com.cgi.model.RTOOffice;
 import com.cgi.model.RTOOfficer;
 import com.cgi.repository.ApplicationRepository;
 import com.cgi.repository.AppointmentRepository;
@@ -12,6 +13,7 @@ import com.cgi.repository.RTOOfficerRepository;
 import com.cgi.service.RTOOfficerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +33,7 @@ public class RTOOfficerServiceImpl implements RTOOfficerService {
     private AppointmentRepository appointmentRepo;
     @Autowired
     private RTOOfficerRepository officerRepository;
+   
 
     @Override
     public boolean officeLogin(RTOOfficer officer) {
@@ -120,12 +123,12 @@ public class RTOOfficerServiceImpl implements RTOOfficerService {
         // TODO: send email logic
         return "License emailed successfully to " + license.getApplication().getApplicant().getUser().getEmail();
     }
+@Override
+public RTOOfficer addOfficer(RTOOfficer officer) {
+    // No need to fetch RTOOffice if rtoId is removed
+    return officerRepository.save(officer);
+}
 
-    @Override
-    public RTOOfficer addOfficer(RTOOfficer officer) {
-        // TODO Auto-generated method stub
-        return officerRepository.save(officer);
-    }
 
     @Override
     public List<Application> getAllApplications() {
@@ -147,6 +150,7 @@ public class RTOOfficerServiceImpl implements RTOOfficerService {
     }
 
     @Override
+    @Transactional
     public Application reviewApplication(Long id, String status, String reviewedBy) {
         return applicationRepo.findById(id).map(app -> {
             // normalize to uppercase; default to PENDING if unknown
@@ -160,4 +164,11 @@ public class RTOOfficerServiceImpl implements RTOOfficerService {
             return applicationRepo.save(app);
         }).orElse(null);
     }
+
+    @Override
+    public Optional<RTOOfficer> findById(int rtoId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    }
 }
+
