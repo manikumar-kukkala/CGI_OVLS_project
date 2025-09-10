@@ -36,26 +36,28 @@ public class ApplicationController {
         return applicationRepository.findByApplicantUserEmailOrderByApplicationDateDesc(email);
     }
 
-    @PostMapping
-    @Transactional
-    public ResponseEntity<Application> createApplication(@RequestBody Application appRequest) {
+   @PostMapping
+@Transactional
+public ResponseEntity<Application> createApplication(@RequestBody Application appRequest) {
 
-        Applicant applicant = resolveApplicant(appRequest.getApplicant());
-        Documents documents = resolveDocuments(appRequest.getDocuments());
+    Applicant applicant = resolveApplicant(appRequest.getApplicant());
+    Documents documents = resolveDocuments(appRequest.getDocuments());
 
-        Application application = new Application();
-        application.setApplicationNumber(appRequest.getApplicationNumber());
-        application.setApplicationDate(appRequest.getApplicationDate());
-        application.setModeOfPayment(appRequest.getModeOfPayment());
-        application.setPaymentStatus(appRequest.getPaymentStatus());
-        application.setRemarks(appRequest.getRemarks());
-        application.setStatus(appRequest.getStatus());
-        application.setApplicant(applicant);
-        application.setDocuments(documents);
+    Application application = new Application();
+    application.setApplicationNumber(appRequest.getApplicationNumber());
+    application.setApplicationDate(appRequest.getApplicationDate());
+    application.setModeOfPayment(appRequest.getModeOfPayment());
+    application.setPaymentStatus(appRequest.getPaymentStatus());
+    application.setRemarks(appRequest.getRemarks());
+    application.setStatus(appRequest.getStatus());
+    application.setApplicant(applicant);
+    application.setDocuments(documents);
+    application.setApplicantName(appRequest.getApplicantName());
 
-        Application saved = applicationRepository.save(application);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
+    Application saved = applicationRepository.save(application);
+    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+}
+
 
     /**
      * Use existing applicant when ID is present; otherwise create a new one.
@@ -167,3 +169,4 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationRepository.save(app));
     }
 }
+
