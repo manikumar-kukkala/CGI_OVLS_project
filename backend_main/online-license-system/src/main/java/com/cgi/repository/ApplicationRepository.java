@@ -21,20 +21,17 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
         String getModeOfPayment(); 
         String getApplicationDate(); 
     }
-
-    @Query("""
-       SELECT a.applicationId AS applicationId,
-              a.applicationNumber AS applicationNumber,
-              a.applicant.user.name AS applicantName,
-              a.status AS status,
-              a.paymentStatus AS paymentStatus,
-              a.modeOfPayment AS modeOfPayment,
-              a.applicationDate AS applicationDate
-       FROM Application a
-       WHERE a.applicant.user.id = :userId
-       ORDER BY a.applicationId DESC
+@Query("""
+   SELECT a.applicationId AS applicationId,
+          a.applicationNumber AS applicationNumber,
+          a.applicant.user.name AS applicantName,
+          a.status AS status,
+          a.paymentStatus AS paymentStatus,
+          a.modeOfPayment AS modeOfPayment,
+          a.applicationDate AS applicationDate
+   FROM Application a
 """)
-LatestStatus findTopByApplicant_User_IdOrderByApplicationIdDesc(@Param("userId") Long userId);
+LatestStatus findLatestByUserId(@Param("userId") Long userId);
 
 
     List<Application> findByStatus(String status);
@@ -53,5 +50,7 @@ LatestStatus findTopByApplicant_User_IdOrderByApplicationIdDesc(@Param("userId")
 
     @Query("SELECT a FROM Application a WHERE LOWER(a.applicant.user.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Application> findByApplicantNameContainingIgnoreCase(@Param("name") String applicantName);
-}
 
+
+    List<LatestStatus> findAllWithApplicantName();
+}
