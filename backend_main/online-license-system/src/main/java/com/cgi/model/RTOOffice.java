@@ -22,6 +22,9 @@ public class RTOOffice {
 
     
     public RTOOffice() {}
+     public RTOOffice(int rtoId) {
+        this.rtoId = rtoId; // ✅ Needed for JSON {"id":1524}
+    }
 
     public RTOOffice(String rtoName) {
         this.rtoName = rtoName;
@@ -36,3 +39,4 @@ public class RTOOffice {
     public Set<RTOOfficer> getOfficers() { return officers; }
     public void setOfficers(Set<RTOOfficer> officers) { this.officers = officers; }
 }
+
