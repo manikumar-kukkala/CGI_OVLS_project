@@ -2,6 +2,7 @@ package com.cgi.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.cgi.model.Application;
 import com.cgi.model.DrivingLicense;
@@ -39,4 +40,7 @@ public interface RTOOfficerService {
     Map<String, Long> getStats();
 
     Application reviewApplication(Long id, String status, String reviewedBy);
+
+    Optional<RTOOfficer> findById(int rtoId);
 }
+
