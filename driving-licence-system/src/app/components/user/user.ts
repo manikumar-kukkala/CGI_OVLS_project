@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder, FormGroup, Validators,
+  ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { of, switchMap, map, forkJoin, Observable, finalize } from 'rxjs';
-import { Application } from '../../models/licence.model';
 import { LicenceService } from '../../services/licence.service';
+import { Application } from '../../models/licence.model';
 
 type Step = 'choose' | 'llRef' | 'form' | 'appointment' | 'payment' | 'done';
 
@@ -52,18 +55,18 @@ export class User implements OnInit {
     this.form = this.fb.group({
       applicantId: [''],
       documentId: [''],
+
       applicationNumber: ['', Validators.required],
       applicantName: ['', Validators.required],
       fatherName: ['', Validators.required],
-      dob: ['',[ Validators.required,this.minimumAgeValidator(18)]],
+
+      dob: ['', [Validators.required, this.minimumAgeValidator(18)]],
       gender: ['', Validators.required],
 
-      // Existing free-text address (kept)
       address: ['', Validators.required],
-       mobile: ['', Validators.required],  // <-- added
-  email: ['', [Validators.required, Validators.email]],
+      mobile: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
 
-      // ⬇️ NEW: Optional structured address fields (not required)
       state: [''],
       city: [''],
       house: [''],
@@ -72,33 +75,29 @@ export class User implements OnInit {
 
       identityProof: [''],
       photo: [''],
+
+      type: ['learning'] // default value; overridden by chooseAction
     });
   }
 
   chooseAction(a: 'learning' | 'permanent' | 'renewal' | 'update') {
     this.selectedAction = a;
+    this.form.patchValue({ type: a });
     this.step = (a === 'permanent') ? 'llRef' : 'form';
   }
 
   minimumAgeValidator(minAge: number) {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const dob = new Date(control.value);
-    if (!control.value) return null; // required validator will handle empty
-
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    const dayDiff = today.getDate() - dob.getDate();
-
-    // Adjust age if birthday hasn’t occurred yet this year
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      age--;
-    }
-
-    return age >= minAge ? null : { underage: true };
-  };
-}
-
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      const dob = new Date(control.value);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      const dayDiff = today.getDate() - dob.getDate();
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age--;
+      return age >= minAge ? null : { underage: true };
+    };
+  }
 
   verifyLLAndContinue() {
     this.llCheckError = null;
@@ -108,7 +107,6 @@ export class User implements OnInit {
       return;
     }
     const appNo = raw;
-
     this.verifyingLL = true;
 
     this.licence.getApplicationByNumber(appNo)
@@ -160,6 +158,7 @@ export class User implements OnInit {
           addressProof: ''
         }).pipe(
           map(d => {
+            console.log('Created document response:', d);
             const id = Number(d?.documentId ?? d?.id ?? null);
             this.createdDocumentId = id;
             return id;
@@ -170,32 +169,30 @@ export class User implements OnInit {
     docs$
       .pipe(
         switchMap((docId: number | null) => {
+          // In case your backend expects nested relations:
           const applicantPart = this.form.value.applicantId
-            ? { applicantId: Number(this.form.value.applicantId) }
-            : { learnerLicenseStatus: 'NEW', drivingLicenseStatus: 'NEW' };
+            ? { applicant: { applicantId: Number(this.form.value.applicantId) } }
+            : null;
 
-          const documentsPart = docId ? { documentId: docId } : null;
+          const documentsPart = docId ? { documents: { documentId: docId } } : null;
 
           const payload: Application = {
-  applicationNumber: this.form.value.applicationNumber ?? 'APP-' + Date.now(),
-  applicationDate: new Date().toISOString(),
-  modeOfPayment: this.selectedPayment ?? '',
-  paymentStatus: this.paymentDone ? 'Completed' : 'Pending',
-  remarks: '',
-  status: 'PENDING',
+            applicationNumber: this.form.value.applicationNumber ?? ('APP-' + Date.now()),
+            applicationDate: new Date().toISOString(),
+            modeOfPayment: this.selectedPayment ?? '',
+            paymentStatus: this.paymentDone ? 'Completed' : 'Pending',
+            remarks: '',
+            status: 'PENDING',
 
-  applicantName: this.form.value.applicantName,   // ✅ camelCase matches backend
+            applicantName: this.form.value.applicantName,
+            address: this.form.value.address,
+            type: this.form.value.type,
 
-  
+            ...(applicantPart ?? {}),
+            ...(documentsPart ?? {}),
+          };
 
-  address: this.form.value.address,
-  type: this.form.value.type,
-};
-
-
-
-
-          return this.http.post<any>('http://localhost:8080/applications', payload);
+          return this.licence.createApplication(payload);
         })
       )
       .subscribe({
@@ -279,7 +276,6 @@ export class User implements OnInit {
   private runPostPaymentUpdates(): Observable<any> {
     const tasks: Observable<any>[] = [];
 
-    // 0) Update Application payment fields
     if (this.createdApplicationId && this.selectedPayment) {
       tasks.push(
         this.licence.updateApplicationPayment(this.createdApplicationId, {
@@ -289,7 +285,6 @@ export class User implements OnInit {
       );
     }
 
-    // 1) Update applicant licence status (learning/permanent)
     const applicantIdToUse =
       (this.form.value.applicantId ? Number(this.form.value.applicantId) : null) ??
       this.createdApplicantId;
@@ -304,7 +299,6 @@ export class User implements OnInit {
       );
     }
 
-    // 2) ⬇️ NEW: Create address row if any optional fields provided
     if (applicantIdToUse) {
       const state = (this.form.value.state ?? '').toString().trim();
       const city = (this.form.value.city ?? '').toString().trim();
@@ -322,8 +316,13 @@ export class User implements OnInit {
       }
     }
 
-    // 3) Update documents (only if we created/have a doc row AND filenames were chosen)
     if (this.createdDocumentId && (this.idProofName || this.photoName)) {
+      console.log('Updating docs', this.createdDocumentId, {
+        idProof: this.idProofName ?? '',
+        photo: this.photoName ?? '',
+        addressProof: ''
+      });
+
       tasks.push(
         this.licence.updateDocuments(this.createdDocumentId, {
           idProof: this.idProofName ?? '',
@@ -333,11 +332,9 @@ export class User implements OnInit {
       );
     }
 
-    // 4) Create appointment
     if (this.createdApplicationId) {
       const today = new Date();
       const isoDate = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-
       tasks.push(
         this.licence.createAppointment({
           applicationId: this.createdApplicationId,

@@ -36,28 +36,35 @@ public class ApplicationController {
         return applicationRepository.findByApplicantUserEmailOrderByApplicationDateDesc(email);
     }
 
-   @PostMapping
-@Transactional
-public ResponseEntity<Application> createApplication(@RequestBody Application appRequest) {
+    @PostMapping
+    @Transactional
+    public ResponseEntity<Application> createApplication(@RequestBody Application appRequest) {
 
-    Applicant applicant = resolveApplicant(appRequest.getApplicant());
-    Documents documents = resolveDocuments(appRequest.getDocuments());
+        Applicant applicant = resolveApplicant(appRequest.getApplicant());
+        Documents documents = resolveDocuments(appRequest.getDocuments());
 
-    Application application = new Application();
-    application.setApplicationNumber(appRequest.getApplicationNumber());
-    application.setApplicationDate(appRequest.getApplicationDate());
-    application.setModeOfPayment(appRequest.getModeOfPayment());
-    application.setPaymentStatus(appRequest.getPaymentStatus());
-    application.setRemarks(appRequest.getRemarks());
-    application.setStatus(appRequest.getStatus());
-    application.setApplicant(applicant);
-    application.setDocuments(documents);
-    application.setApplicantName(appRequest.getApplicantName());
+        Application application = new Application();
+        application.setApplicationNumber(appRequest.getApplicationNumber());
+        application.setApplicationDate(appRequest.getApplicationDate());
+        application.setModeOfPayment(appRequest.getModeOfPayment());
+        application.setPaymentStatus(appRequest.getPaymentStatus());
+        application.setRemarks(appRequest.getRemarks());
+        application.setStatus(appRequest.getStatus());
+        application.setApplicant(applicant);
+        application.setDocuments(documents);
+        // ✅ Prefer incoming name; if missing, use relation's user.name if available
+        String incomingName = appRequest.getApplicantName();
+        if (incomingName != null && !incomingName.isBlank()) {
+            application.setApplicantName(incomingName);
+        } else if (applicant != null && applicant.getUser() != null) {
+            application.setApplicantName(applicant.getUser().getName());
+        } else {
+            application.setApplicantName(null); // fine; @PrePersist may still fill if relation exists
+        }
 
-    Application saved = applicationRepository.save(application);
-    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-}
-
+        Application saved = applicationRepository.save(application);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
     /**
      * Use existing applicant when ID is present; otherwise create a new one.
@@ -115,11 +122,10 @@ public ResponseEntity<Application> createApplication(@RequestBody Application ap
     }
 
     @GetMapping("/status/latest/by-user/{userId}")
-public ResponseEntity<ApplicationRepository.LatestStatus> latestStatusByUser(@PathVariable Long userId) {
-    ApplicationRepository.LatestStatus view = applicationRepository.findLatestByUserId(userId);
-    return (view == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(view);
-}
-
+    public ResponseEntity<ApplicationRepository.LatestStatus> latestStatusByUser(@PathVariable Long userId) {
+        ApplicationRepository.LatestStatus view = applicationRepository.findLatestByUserId(userId);
+        return (view == null) ? ResponseEntity.notFound().build() : ResponseEntity.ok(view);
+    }
 
     @GetMapping("/by-number/{number}")
     public ResponseEntity<Application> byNumber(@PathVariable String number) {
@@ -142,10 +148,9 @@ public ResponseEntity<ApplicationRepository.LatestStatus> latestStatusByUser(@Pa
     // 4) NEW (tiny): Provide GET /applications so your Angular fallback stops
     // getting 405.
     @GetMapping
-public List<ApplicationRepository.LatestStatus> listAll() {
-    return applicationRepository.findAllWithApplicantName();
-}
-
+    public List<ApplicationRepository.LatestStatus> listAll() {
+        return applicationRepository.findAllWithApplicantName();
+    }
 
     // --- DTO for payment patch ---
     public static class PaymentPatch {

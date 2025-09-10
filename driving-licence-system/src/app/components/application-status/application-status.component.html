@@ -5,21 +5,17 @@
       Check the status of your Driving Licence / Learner’s Licence
     </p>
 
-    <form [formGroup]="form" (ngSubmit)="check()" class="mb-4">
+    <form [formGroup]="form" (ngSubmit)="check()" class="mb-4" novalidate>
       <div class="mb-3">
-        <label class="form-label fw-semibold">Application ID</label>
-        <input type="text"
-               formControlName="applicationId"
-               class="form-control"
-               placeholder="Enter Application ID"
+        <label class="form-label fw-semibold">Application # (e.g., APP-001)</label>
+        <input type="text" formControlName="applicationId" class="form-control"
+               placeholder="Enter Application Number"
                [ngClass]="{'is-invalid': form.controls['applicationId'].invalid && form.controls['applicationId'].touched}">
       </div>
 
       <div class="mb-3">
         <label class="form-label fw-semibold">Applicant Name</label>
-        <input type="text"
-               formControlName="name"
-               class="form-control"
+        <input type="text" formControlName="name" class="form-control"
                placeholder="Enter Applicant Name"
                [ngClass]="{'is-invalid': form.controls['name'].invalid && form.controls['name'].touched}">
       </div>
@@ -27,30 +23,25 @@
       <button type="submit" class="btn btn-primary w-100">Check Status</button>
     </form>
 
+    <div *ngIf="errorMsg" class="alert alert-danger">{{ errorMsg }}</div>
 
-    <div class="text-center text-danger" *ngIf="form.invalid && form.touched">
-      Both fields are required.
-    </div>
+    <div *ngIf="details" class="mt-4 p-4 border rounded bg-white shadow-sm">
+      <div class="text-center mb-3">
+        <h4 class="fw-bold">Application #: {{ details.applicationNumber }}</h4>
+        <h5 class="mb-3">Name: {{ details.applicantName }}</h5>
 
-    <div *ngIf="statusResult" class="mt-4 p-4 border rounded bg-white shadow-sm text-center">
-      <h4 class="fw-bold">Application ID: {{ statusResult.id }}</h4>
-      <h5 class="mb-3">Name: {{ statusResult.name }}</h5>
-
- 
-      <div class="my-3">
         <span class="badge px-4 py-2 fs-6"
           [ngClass]="{
-            'bg-success': statusResult.status==='APPROVED',
-            'bg-warning text-dark': statusResult.status==='UNDER REVIEW',
-            'bg-danger': statusResult.status==='REJECTED',
-            'bg-info text-dark': statusResult.status==='SUBMITTED'
+            'bg-success': details.statusLabel==='Approved',
+            'bg-warning text-dark': details.statusLabel==='Under Review',
+            'bg-danger': details.statusLabel==='Rejected',
+            'bg-info text-dark': details.statusLabel==='Submitted'
           }">
-          {{ statusResult.status }}
+          {{ details.statusLabel }}
         </span>
       </div>
 
-  
-      <div class="progress mt-4" style="height: 25px;">
+      <div class="progress my-4" style="height: 25px;">
         <div class="progress-bar progress-bar-striped progress-bar-animated fw-bold"
              role="progressbar"
              [style.width.%]="getProgress()"
@@ -59,14 +50,62 @@
         </div>
       </div>
 
+      <!-- 🔎 FULL DETAILS FROM Application TABLE -->
+      <table class="table table-bordered align-middle">
+        <tbody>
+          <tr>
+            <th style="width: 240px;">Application ID</th>
+            <td>{{ details.applicationId ?? '-' }}</td>
+          </tr>
+          <tr>
+            <th>Application Number</th>
+            <td>{{ details.applicationNumber }}</td>
+          </tr>
+          <tr>
+            <th>Applicant Name</th>
+            <td>{{ details.applicantName ?? '-' }}</td>
+          </tr>
+          <tr>
+            <th>Application Date</th>
+            <td>
+              <ng-container *ngIf="details.applicationDate; else noDate">
+                {{ details.applicationDate | date:'medium' }}
+                <small class="text-muted ms-1">({{ details.applicationDate }})</small>
+              </ng-container>
+              <ng-template #noDate>-</ng-template>
+            </td>
+          </tr>
+          <tr>
+            <th>Mode of Payment</th>
+            <td>{{ details.modeOfPayment || '-' }}</td>
+          </tr>
+          <tr>
+            <th>Payment Status</th>
+            <td>{{ details.paymentStatus || '-' }}</td>
+          </tr>
+          <tr>
+            <th>Status (raw)</th>
+            <td>{{ details.rawStatus || '-' }}</td>
+          </tr>
+          <tr>
+            <th>Remarks</th>
+            <td>{{ details.remarks || '-' }}</td>
+          </tr>
+          <!-- <tr *ngIf="details.applicantId">
+            <th>Applicant ID (FK)</th>
+            <td>{{ details.applicantId }}</td>
+          </tr>
+          <tr *ngIf="details.documentId">
+            <th>Document ID (FK)</th>
+            <td>{{ details.documentId }}</td>
+          </tr> -->
+        </tbody>
+      </table>
 
-      <div class="d-flex justify-content-between mt-2 px-1">
-        <small class="fw-bold">Submitted</small>
-        <small class="fw-bold">Under Review</small>
-        <small class="fw-bold">
-          {{ statusResult.status==='Rejected' ? 'Rejected' : 'Approved' }}
-        </small>
-      </div>
+      <div class="d-flex justify-content-between mt-3">
+  <button class="btn btn-secondary" (click)="close()">Close</button>
+  <button class="btn btn-outline-secondary" (click)="print()">Print</button>
+</div>
     </div>
   </div>
 </div>

@@ -14,25 +14,31 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     // Projection for a lightweight view
     interface LatestStatus {
         Long getApplicationId();
-        String getApplicationNumber();
-        String getApplicantName();
-        String getStatus(); 
-        String getPaymentStatus(); 
-        String getModeOfPayment(); 
-        String getApplicationDate(); 
-    }
-@Query("""
-   SELECT a.applicationId AS applicationId,
-          a.applicationNumber AS applicationNumber,
-          a.applicant.user.name AS applicantName,
-          a.status AS status,
-          a.paymentStatus AS paymentStatus,
-          a.modeOfPayment AS modeOfPayment,
-          a.applicationDate AS applicationDate
-   FROM Application a
-""")
-LatestStatus findLatestByUserId(@Param("userId") Long userId);
 
+        String getApplicationNumber();
+
+        String getApplicantName();
+
+        String getStatus();
+
+        String getPaymentStatus();
+
+        String getModeOfPayment();
+
+        String getApplicationDate();
+    }
+
+    @Query("""
+               SELECT a.applicationId AS applicationId,
+                      a.applicationNumber AS applicationNumber,
+                      a.applicant.user.name AS applicantName,
+                      a.status AS status,
+                      a.paymentStatus AS paymentStatus,
+                      a.modeOfPayment AS modeOfPayment,
+                      a.applicationDate AS applicationDate
+               FROM Application a
+            """)
+    LatestStatus findLatestByUserId(@Param("userId") Long userId);
 
     List<Application> findByStatus(String status);
 
@@ -51,6 +57,15 @@ LatestStatus findLatestByUserId(@Param("userId") Long userId);
     @Query("SELECT a FROM Application a WHERE LOWER(a.applicant.user.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<Application> findByApplicantNameContainingIgnoreCase(@Param("name") String applicantName);
 
-
+    @Query("""
+               SELECT a.applicationId AS applicationId,
+                      a.applicationNumber AS applicationNumber,
+                      a.applicant.user.name AS applicantName,
+                      a.status AS status,
+                      a.paymentStatus AS paymentStatus,
+                      a.modeOfPayment AS modeOfPayment,
+                      a.applicationDate AS applicationDate
+               FROM Application a
+            """)
     List<LatestStatus> findAllWithApplicantName();
 }

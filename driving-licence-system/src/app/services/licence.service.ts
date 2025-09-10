@@ -32,6 +32,11 @@ export class LicenceService {
 }
 
 
+  createApplication(payload: any): Observable<any> {
+    return this.http.post(`${this.base}/applications`, payload);
+  }
+
+
   getUserApplications(userId: string): Observable<{ applications: Application[] }> {
     return this.http.get<{ applications: Application[] }>(`${this.base}/api/applications/user/${userId}`);
   }
@@ -52,9 +57,10 @@ export class LicenceService {
     return this.http.get<any>(`${this.base}/applications/by-number/${encodeURIComponent(appNumber)}`);
   }
 
-  // --- Documents ---
-  updateDocuments(id: number, body: { addressProof?: string; idProof?: string; photo?: string }): Observable<any> {
-    return this.http.put<any>(`${this.base}/documents/update/${id}`, body);
+  // Update documents (works for both /{id} and /update/{id}; use one)
+  updateDocuments(id: number, payload: { idProof?: string; photo?: string; addressProof?: string }): Observable<any> {
+    return this.http.put(`${this.base}/documents/update/${id}`, payload);
+    // or: return this.http.put(`${this.baseUrl}/documents/${id}`, payload);
   }
 
   // --- Appointments ---
