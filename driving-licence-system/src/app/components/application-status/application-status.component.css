@@ -1,0 +1,14 @@
+.card {
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.progress {
+  height: 25px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  font-size: 0.9rem;
+}
