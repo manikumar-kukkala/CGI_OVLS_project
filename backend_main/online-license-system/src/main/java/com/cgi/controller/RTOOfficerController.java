@@ -2,7 +2,9 @@ package com.cgi.controller;
 
 import com.cgi.model.Application;
 import com.cgi.model.DrivingLicense;
+import com.cgi.model.RTOOffice;
 import com.cgi.model.RTOOfficer;
+import com.cgi.repository.RTOOfficeRepository;
 import com.cgi.service.RTOOfficerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,21 @@ public class RTOOfficerController {
     @Autowired
     private RTOOfficerService officerService;
 
-    @PostMapping("/add")
-    public RTOOfficer addOfficer(@RequestBody RTOOfficer officer) {
-        return officerService.addOfficer(officer);
+
+@PostMapping("/add")
+public ResponseEntity<?> addOfficer(@RequestBody RTOOfficer officer) {
+    try {
+        RTOOfficer savedOfficer = officerService.addOfficer(officer);
+        return ResponseEntity.ok(savedOfficer);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body("Error: " + e.getMessage());
     }
+}
+
+
+
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody RTOOfficer officer) {
@@ -115,3 +128,4 @@ public class RTOOfficerController {
 
     }
 }
+
