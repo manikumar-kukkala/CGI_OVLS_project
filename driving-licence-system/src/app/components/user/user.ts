@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -53,13 +53,15 @@ export class User implements OnInit {
       applicantId: [''],
       documentId: [''],
       applicationNumber: ['', Validators.required],
-      name: ['', Validators.required],
+      applicantName: ['', Validators.required],
       fatherName: ['', Validators.required],
-      dob: ['', Validators.required],
+      dob: ['',[ Validators.required,this.minimumAgeValidator(18)]],
       gender: ['', Validators.required],
 
       // Existing free-text address (kept)
       address: ['', Validators.required],
+       mobile: ['', Validators.required],  // <-- added
+  email: ['', [Validators.required, Validators.email]],
 
       // ⬇️ NEW: Optional structured address fields (not required)
       state: [''],
@@ -77,6 +79,26 @@ export class User implements OnInit {
     this.selectedAction = a;
     this.step = (a === 'permanent') ? 'llRef' : 'form';
   }
+
+  minimumAgeValidator(minAge: number) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const dob = new Date(control.value);
+    if (!control.value) return null; // required validator will handle empty
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const dayDiff = today.getDate() - dob.getDate();
+
+    // Adjust age if birthday hasn’t occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age >= minAge ? null : { underage: true };
+  };
+}
+
 
   verifyLLAndContinue() {
     this.llCheckError = null;
@@ -155,15 +177,23 @@ export class User implements OnInit {
           const documentsPart = docId ? { documentId: docId } : null;
 
           const payload: Application = {
-            applicationNumber: this.form.value.applicationNumber,
-            applicationDate: new Date().toISOString(),
-            modeOfPayment: this.selectedPayment ?? '',
-            paymentStatus: this.paymentDone ? 'Completed' : 'Pending',
-            remarks: '',
-            status: 'PENDING',
-            applicant: applicantPart,
-            documents: documentsPart
-          };
+  applicationNumber: this.form.value.applicationNumber ?? 'APP-' + Date.now(),
+  applicationDate: new Date().toISOString(),
+  modeOfPayment: this.selectedPayment ?? '',
+  paymentStatus: this.paymentDone ? 'Completed' : 'Pending',
+  remarks: '',
+  status: 'PENDING',
+
+  applicantName: this.form.value.applicantName,   // ✅ camelCase matches backend
+
+  
+
+  address: this.form.value.address,
+  type: this.form.value.type,
+};
+
+
+
 
           return this.http.post<any>('http://localhost:8080/applications', payload);
         })
