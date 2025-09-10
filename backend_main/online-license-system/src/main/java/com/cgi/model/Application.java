@@ -68,8 +68,10 @@ public class Application {
     }
 
     public String getApplicantName() {
-        // derive from applicant → user
-        return applicantName;
+        if (applicant != null && applicant.getUser() != null) {
+        return applicant.getUser().getName();
+    }
+    return null;
     }
 
     public void setApplicantName(String applicantName) {
@@ -133,4 +135,3 @@ public class Application {
         this.status = status;
     }
 }
-
