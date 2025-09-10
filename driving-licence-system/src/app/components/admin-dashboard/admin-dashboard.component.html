@@ -73,20 +73,21 @@
 
           <td>
             <span class="badge"
-                  [ngClass]="{
-                    'bg-success': app.status === 'APPROVED',
-                    'bg-danger':  app.status === 'REJECTED',
-                    'bg-warning text-dark': app.status === 'PENDING'
-                  }">
-              {{ app.status | lowercase }}
-            </span>
+      [ngClass]="{
+        'bg-success': app.status.toUpperCase() === 'APPROVED',
+        'bg-danger':  app.status.toUpperCase() === 'REJECTED',
+        'bg-warning text-dark': app.status.toUpperCase() === 'PENDING'
+      }">
+  {{ app.status | titlecase }}
+</span>
+
           </td>
 
           <td class="text-center">
-            <button *ngIf="app.status !== 'APPROVED'"
+            <button *ngIf="app.status.toUpperCase !== 'APPROVED'"
                     class="btn btn-sm btn-success me-2"
                     (click)="review(app, 'approved')">✅ Approve</button>
-            <button *ngIf="app.status !== 'REJECTED'"
+            <button *ngIf="app.status.toUpperCase !== 'REJECTED'"
                     class="btn btn-sm btn-danger"
                     (click)="review(app, 'rejected')">❌ Reject</button>
           </td>
@@ -99,3 +100,4 @@
     </table>
   </div>
 </div>
+
