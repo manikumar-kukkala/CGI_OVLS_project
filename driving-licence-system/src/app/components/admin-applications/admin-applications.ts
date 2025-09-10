@@ -46,7 +46,10 @@ export class AdminApplications {
     next: (apps) => {
       this.applications = (apps ?? []).map(a => ({
         ...a,
-        applicantName: a.applicantName ?? 'Unknown', // <-- map backend field
+        applicantName: a.applicantName 
+    ?? a.applicant?.user?.name 
+  
+    ?? 'Unknown', // <-- map backend field
         status: (a.status ?? 'PENDING').toString().toUpperCase() as Status
       }));
       this.applyFilter();
@@ -91,4 +94,3 @@ export class AdminApplications {
     });
   }
 }
-
