@@ -1,6 +1,8 @@
 package com.cgi.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.cgi.model.Applicant;
 import com.cgi.model.Application;
@@ -12,19 +14,28 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     // Projection for a lightweight view
     interface LatestStatus {
         Long getApplicationId();
-
         String getApplicationNumber();
-
-        String getStatus(); // PENDING | APPROVED | REJECTED
-
-        String getPaymentStatus(); // Completed | Pending
-
-        String getModeOfPayment(); // online | challan
-
-        String getApplicationDate(); // keep your current type (String)
+        String getApplicantName();
+        String getStatus(); 
+        String getPaymentStatus(); 
+        String getModeOfPayment(); 
+        String getApplicationDate(); 
     }
 
-    LatestStatus findTopByApplicant_User_IdOrderByApplicationIdDesc(Long userId);
+    @Query("""
+       SELECT a.applicationId AS applicationId,
+              a.applicationNumber AS applicationNumber,
+              a.applicant.user.name AS applicantName,
+              a.status AS status,
+              a.paymentStatus AS paymentStatus,
+              a.modeOfPayment AS modeOfPayment,
+              a.applicationDate AS applicationDate
+       FROM Application a
+       WHERE a.applicant.user.id = :userId
+       ORDER BY a.applicationId DESC
+""")
+LatestStatus findTopByApplicant_User_IdOrderByApplicationIdDesc(@Param("userId") Long userId);
+
 
     List<Application> findByStatus(String status);
 
@@ -36,5 +47,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     Optional<Application> findFirstByApplicationNumberIgnoreCase(String number);
 
-    // Optional<Applicant> findByApplicationNumber(String number);
+    // ✅ Fixed methods using @Query
+    @Query("SELECT a FROM Application a WHERE a.applicant.user.name = :name")
+    List<Application> findByApplicantName(@Param("name") String applicantName);
+
+    @Query("SELECT a FROM Application a WHERE LOWER(a.applicant.user.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    List<Application> findByApplicantNameContainingIgnoreCase(@Param("name") String applicantName);
 }
+
