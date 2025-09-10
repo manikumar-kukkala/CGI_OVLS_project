@@ -1,18 +1,72 @@
-<h2>Application Status</h2>
-<form [formGroup]="form" (ngSubmit)="check()">
-  <input type="text" formControlName="applicationNumber" placeholder="Application Number" />
-  <button type="submit">Check</button>
-  <div *ngIf="error" style="color:red">{{ error }}</div>
-</form>
+<div class="container my-5">
+  <div class="card shadow-lg p-4">
+    <h1 class="text-center mb-3 text-primary fw-bold">🚦 RTO Application Status</h1>
+    <p class="text-center text-muted mb-4">
+      Check the status of your Driving Licence / Learner’s Licence
+    </p>
 
-<h3>User Applications</h3>
-<ul>
-  <li *ngFor="let app of userApps">
-    <!-- {{ app.applicationId }} - {{ app.status }} -->
-  </li>
-</ul>
+    <form [formGroup]="form" (ngSubmit)="check()" class="mb-4">
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Application ID</label>
+        <input type="text"
+               formControlName="applicationId"
+               class="form-control"
+               placeholder="Enter Application ID"
+               [ngClass]="{'is-invalid': form.controls['applicationId'].invalid && form.controls['applicationId'].touched}">
+      </div>
 
-<h3>Search Result</h3>
-<div *ngIf="searchResult">
-  <!-- {{ searchResult.applicationId}} - {{ searchResult.status }} -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Applicant Name</label>
+        <input type="text"
+               formControlName="name"
+               class="form-control"
+               placeholder="Enter Applicant Name"
+               [ngClass]="{'is-invalid': form.controls['name'].invalid && form.controls['name'].touched}">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Check Status</button>
+    </form>
+
+
+    <div class="text-center text-danger" *ngIf="form.invalid && form.touched">
+      Both fields are required.
+    </div>
+
+    <div *ngIf="statusResult" class="mt-4 p-4 border rounded bg-white shadow-sm text-center">
+      <h4 class="fw-bold">Application ID: {{ statusResult.id }}</h4>
+      <h5 class="mb-3">Name: {{ statusResult.name }}</h5>
+
+ 
+      <div class="my-3">
+        <span class="badge px-4 py-2 fs-6"
+          [ngClass]="{
+            'bg-success': statusResult.status==='APPROVED',
+            'bg-warning text-dark': statusResult.status==='UNDER REVIEW',
+            'bg-danger': statusResult.status==='REJECTED',
+            'bg-info text-dark': statusResult.status==='SUBMITTED'
+          }">
+          {{ statusResult.status }}
+        </span>
+      </div>
+
+  
+      <div class="progress mt-4" style="height: 25px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated fw-bold"
+             role="progressbar"
+             [style.width.%]="getProgress()"
+             [ngClass]="getProgressColor()">
+             {{ getProgress() }}%
+        </div>
+      </div>
+
+
+      <div class="d-flex justify-content-between mt-2 px-1">
+        <small class="fw-bold">Submitted</small>
+        <small class="fw-bold">Under Review</small>
+        <small class="fw-bold">
+          {{ statusResult.status==='Rejected' ? 'Rejected' : 'Approved' }}
+        </small>
+      </div>
+    </div>
+  </div>
 </div>
