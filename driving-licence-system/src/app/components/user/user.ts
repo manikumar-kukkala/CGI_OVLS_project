@@ -56,7 +56,8 @@ export class User implements OnInit {
       applicantId: [''],
       documentId: [''],
 
-      applicationNumber: ['', Validators.required],
+      // Default pattern for LL (APP-###); updated dynamically per flow
+      applicationNumber: ['', [Validators.required, Validators.pattern(/^APP-\d{3,}$/)]],
       applicantName: ['', Validators.required],
       fatherName: ['', Validators.required],
 
@@ -76,13 +77,51 @@ export class User implements OnInit {
       identityProof: [''],
       photo: [''],
 
-      type: ['learning'] // default value; overridden by chooseAction
+      // UI-only; DO NOT POST this
+      type: ['learning']
     });
+  }
+
+  private setValidatorsForFlow(flow: 'learning' | 'permanent' | 'renewal' | 'update') {
+    const set = (c: string, v: any[]) => this.form.get(c)?.setValidators(v);
+    const req = () => [Validators.required];
+
+    // applicationNumber: LL uses APP-###, DL uses DL-APP-###
+    if (flow === 'permanent') {
+      set('applicationNumber', [Validators.required, Validators.pattern(/^DL-\s*APP-\d{3,}$/)]);
+    } else {
+      set('applicationNumber', [Validators.required, Validators.pattern(/^APP-\d{3,}$/)]);
+    }
+
+    // Always required:
+    set('applicantName', req());
+    set('address', req());
+
+    if (flow === 'permanent') {
+      // DL reuses LL; make these optional
+      set('fatherName', []);
+      set('mobile', []);
+      set('email', [Validators.email]);   // format-only check
+      set('dob', []);                      // optional in DL flow
+      set('gender', []);                   // optional in DL flow
+    } else {
+      set('fatherName', req());
+      set('mobile', req());
+      set('email', [Validators.required, Validators.email]);
+      set('dob', [Validators.required, this.minimumAgeValidator(18)]);
+      set('gender', req());
+    }
+
+    [
+      'applicationNumber','applicantName','address','fatherName',
+      'mobile','email','dob','gender'
+    ].forEach(c => this.form.get(c)?.updateValueAndValidity());
   }
 
   chooseAction(a: 'learning' | 'permanent' | 'renewal' | 'update') {
     this.selectedAction = a;
-    this.form.patchValue({ type: a });
+    this.form.patchValue({ type: a });   // UI-only; not posted
+    this.setValidatorsForFlow(a);
     this.step = (a === 'permanent') ? 'llRef' : 'form';
   }
 
@@ -109,15 +148,43 @@ export class User implements OnInit {
     const appNo = raw;
     this.verifyingLL = true;
 
+    const handleFound = (app: any) => {
+      // LL must be APPROVED (frontend hint; backend enforces too)
+      const status = String(app?.status ?? '').toUpperCase();
+      if (status !== 'APPROVED') {
+        this.llCheckError = 'Your Learning Licence application is not APPROVED yet.';
+        return;
+      }
+
+      // Reuse Applicant & Documents
+      const applicantId = Number(app?.applicant?.applicantId ?? app?.applicantId ?? NaN);
+      const documentId  = Number(app?.documents?.documentId ?? app?.documentId ?? NaN);
+      const llAppNo     = String(app?.applicationNumber ?? '').trim();
+
+      // ✅ DL application number rule: "DL-<LL application number>"
+      const dlAppNo = `DL-${llAppNo}`;
+
+      this.form.patchValue({
+        applicantId: Number.isFinite(applicantId) ? applicantId : '',
+        documentId:  Number.isFinite(documentId)  ? documentId  : '',
+        applicationNumber: dlAppNo,
+        applicantName: app?.applicantName ?? app?.applicant?.user?.name ?? '',
+        address: app?.address ?? ''
+      });
+
+      // Make sure validators are set for DL and rechecked
+      this.setValidatorsForFlow('permanent');
+      this.form.updateValueAndValidity();
+
+      this.step = 'form';
+    };
+
     this.licence.getApplicationByNumber(appNo)
       .pipe(finalize(() => (this.verifyingLL = false)))
       .subscribe({
-        next: (app: any) => {
-          const applicantId = Number(app?.applicant?.applicantId ?? app?.applicantId ?? NaN);
-          if (Number.isFinite(applicantId)) this.form.patchValue({ applicantId });
-          this.step = 'form';
-        },
+        next: (app: any) => handleFound(app),
         error: () => {
+          // fallback: search all apps
           this.verifyingLL = true;
           this.licence.getAllApplications()
             .pipe(finalize(() => (this.verifyingLL = false)))
@@ -127,10 +194,11 @@ export class User implements OnInit {
                 const llApp = rows.find(a =>
                   String(a?.applicationNumber ?? '').toLowerCase() === appNo.toLowerCase()
                 );
-                if (!llApp) { this.llCheckError = 'No application found for that LL Application Number.'; return; }
-                const applicantId = Number(llApp?.applicant?.applicantId ?? llApp?.applicantId ?? NaN);
-                if (Number.isFinite(applicantId)) this.form.patchValue({ applicantId });
-                this.step = 'form';
+                if (!llApp) {
+                  this.llCheckError = 'No application found for that LL Application Number.';
+                  return;
+                }
+                handleFound(llApp);
               },
               error: () => { this.llCheckError = 'Failed to verify LL Application Number. Please try again.'; }
             });
@@ -148,8 +216,15 @@ export class User implements OnInit {
 
   submitForm() {
     this.error = '';
-    if (this.form.invalid) return;
 
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.focusFirstInvalid();
+      this.error = 'Please fix the highlighted fields.';
+      return;
+    }
+
+    // Only create docs if user didn’t supply a Document ID and selected files
     const needCreateDocs = !this.form.value.documentId && (this.idProofName || this.photoName);
     const docs$ = needCreateDocs
       ? this.http.post<any>('http://localhost:8080/documents', {
@@ -158,7 +233,6 @@ export class User implements OnInit {
           addressProof: ''
         }).pipe(
           map(d => {
-            console.log('Created document response:', d);
             const id = Number(d?.documentId ?? d?.id ?? null);
             this.createdDocumentId = id;
             return id;
@@ -169,27 +243,32 @@ export class User implements OnInit {
     docs$
       .pipe(
         switchMap((docId: number | null) => {
-          // In case your backend expects nested relations:
           const applicantPart = this.form.value.applicantId
             ? { applicant: { applicantId: Number(this.form.value.applicantId) } }
             : null;
 
           const documentsPart = docId ? { documents: { documentId: docId } } : null;
 
+          const licenceType = this.mapToLicenceType(this.selectedAction ?? 'learning');
+
+          // IMPORTANT: use the form's applicationNumber (DL flow builds DL-<LL no>)
           const payload: Application = {
-            applicationNumber: this.form.value.applicationNumber ?? ('APP-' + Date.now()),
+            applicationNumber: this.form.value.applicationNumber,
             applicationDate: new Date().toISOString(),
             modeOfPayment: this.selectedPayment ?? '',
             paymentStatus: this.paymentDone ? 'Completed' : 'Pending',
             remarks: '',
             status: 'PENDING',
 
+            // required by backend rules
+            licenceType,
+
+            // optional, stored on Application entity
             applicantName: this.form.value.applicantName,
             address: this.form.value.address,
-            type: this.form.value.type,
 
             ...(applicantPart ?? {}),
-            ...(documentsPart ?? {}),
+            ...(documentsPart ?? {})
           };
 
           return this.licence.createApplication(payload);
@@ -217,11 +296,21 @@ export class User implements OnInit {
           this.step = 'appointment';
         },
         error: (err) => {
+          const serverMsg =
+            err?.error?.message ||
+            err?.error?.error ||
+            (typeof err?.error === 'string' ? err.error : '') ||
+            err?.message;
+
           this.submitted = false;
-          this.error = 'There was an error submitting your application.';
-          console.error(err);
+          this.error = serverMsg || 'Bad Request. Please check the inputs.';
+          console.error('Create application failed:', err);
         }
       });
+  }
+
+  private mapToLicenceType(a: 'learning' | 'permanent' | 'renewal' | 'update'): 'LL' | 'DL' {
+    return a === 'permanent' ? 'DL' : 'LL';
   }
 
   selectTimeslot(s: string) { this.timeslot = s; }
@@ -265,6 +354,8 @@ export class User implements OnInit {
     this.createdApplicantId = null;
     this.llIdInput = '';
     this.llCheckError = null;
+    // reset default validators to LL flow defaults
+    this.setValidatorsForFlow('learning');
   }
 
   back() {
@@ -317,12 +408,6 @@ export class User implements OnInit {
     }
 
     if (this.createdDocumentId && (this.idProofName || this.photoName)) {
-      console.log('Updating docs', this.createdDocumentId, {
-        idProof: this.idProofName ?? '',
-        photo: this.photoName ?? '',
-        addressProof: ''
-      });
-
       tasks.push(
         this.licence.updateDocuments(this.createdDocumentId, {
           idProof: this.idProofName ?? '',
@@ -348,5 +433,15 @@ export class User implements OnInit {
     }
 
     return tasks.length ? forkJoin(tasks) : of(null);
+  }
+
+  private focusFirstInvalid() {
+    const firstInvalidKey = Object.keys(this.form.controls)
+      .find(k => this.form.get(k)?.invalid);
+    if (firstInvalidKey) {
+      const el = document.querySelector(`[formControlName="${firstInvalidKey}"]`) as HTMLElement | null;
+      el?.focus?.();
+      el?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    }
   }
 }

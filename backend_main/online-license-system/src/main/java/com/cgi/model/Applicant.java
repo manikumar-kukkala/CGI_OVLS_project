@@ -18,12 +18,10 @@ public class Applicant {
     @JsonProperty("driving_license_status")
     private String drivingLicenseStatus;
 
-
     @ManyToOne
     private User user;
     @OneToOne
     private Application application;
-
 
     // Constructors
     public Applicant() {

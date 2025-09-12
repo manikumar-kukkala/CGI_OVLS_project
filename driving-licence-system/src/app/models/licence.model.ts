@@ -1,5 +1,5 @@
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
-export type LicenceType = 'learning' | 'permanent';
+export type LicenceType = 'LL' | 'DL';
 
 export type AppStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 export interface ApplicationSummary {
@@ -20,7 +20,7 @@ export interface Application {
   paymentStatus: string;
   remarks: string;
   status: string;
-
+  licenceType: LicenceType;
   // NEW fields added to match backend
   applicantName: string;
   fatherName?: string;

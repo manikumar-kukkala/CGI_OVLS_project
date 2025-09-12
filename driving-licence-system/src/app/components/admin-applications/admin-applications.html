@@ -10,9 +10,11 @@
     <table class="table table-hover table-striped align-middle">
       <thead class="table-dark">
         <tr>
-          <th style="min-width: 260px;">Name</th>
+          <th style="min-width: 220px;">Name</th>
           <th style="min-width: 180px;">Application Number</th>
+          <th style="min-width: 160px;">Application Type</th> <!-- NEW -->
           <th style="min-width: 140px;">Status</th>
+          <th style="min-width: 120px;">View</th>
           <th class="text-center" style="min-width: 220px;">Actions</th>
         </tr>
       </thead>
@@ -20,10 +22,17 @@
       <tbody>
         <tr *ngFor="let app of filteredApplications">
           <!-- Name -->
-          <td>{{ app?.applicantName}}</td>
+          <td>{{ app?.applicantName }}</td>
 
           <!-- Application Number -->
           <td>{{ app?.applicationNumber }}</td>
+
+          <!-- Application Type (LL/DL prettified) -->
+          <td>
+           <span class="badge bg-info text-dark px-3 py-2">
+ {{ prettyLicenceType(app?.licenceType) }}  <!-- ✅ no licence_type -->
+</span>
+          </td>
 
           <!-- Status -->
           <td>
@@ -37,15 +46,23 @@
             </span>
           </td>
 
-          <!-- Actions -->
+          <!-- View -->
+          <td>
+            <button class="btn btn-sm btn-primary"
+                    (click)="openModal(app)">
+              <i class="bi bi-eye me-1"></i> View
+            </button>
+          </td>
+
+          <!-- Actions (open review modal for remarks) -->
           <td class="text-center">
             <button class="btn btn-sm btn-success me-2"
-                    (click)="review(app, 'approved')">
+                    (click)="startReview(app, 'approved')">
               <i class="bi bi-check-square me-1"></i> Approve
             </button>
 
             <button class="btn btn-sm btn-danger"
-                    (click)="review(app, 'rejected')">
+                    (click)="startReview(app, 'rejected')">
               <i class="bi bi-x-square me-1"></i> Reject
             </button>
           </td>
@@ -53,11 +70,138 @@
 
         <!-- Empty state -->
         <tr *ngIf="filteredApplications.length === 0">
-          <td colspan="4" class="text-center text-muted py-4">
+          <td colspan="6" class="text-center text-muted py-4">
             No applications found.
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- ===== Details modal ===== -->
+<div
+  class="app-modal-backdrop"
+  *ngIf="showModal"
+  (click)="onBackdrop($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="appDetailsTitle"
+>
+  <div class="app-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="app-modal-header">
+      <h5 id="appDetailsTitle" class="m-0">
+        Application Details
+        <small class="text-muted ms-2">#{{ selectedApp?.applicationNumber }}</small>
+      </h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+    </div>
+
+    <div class="app-modal-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="small text-muted">Applicant Name</div>
+          <div class="fw-semibold">{{ selectedApp?.applicantName || '—' }}</div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="small text-muted">Licence Type</div>
+         <div class="fw-semibold">
+  {{ prettyLicenceType(selectedApp?.licenceType) }}
+ <!-- ✅ no licence_type -->
+</div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="small text-muted">Application Type</div>
+          <div class="fw-semibold">
+            {{ prettyLicenceType(selectedApp?.licenceType) }}
+
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="small text-muted">Status</div>
+          <div>
+            <span class="badge px-3 py-2 text-capitalize"
+                  [ngClass]="{
+                    'bg-success':  selectedApp?.status === 'APPROVED',
+                    'bg-danger':   selectedApp?.status === 'REJECTED',
+                    'bg-secondary':selectedApp?.status === 'PENDING'
+                  }">
+              {{ (selectedApp?.status || 'PENDING') | lowercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="small text-muted">Mode of Payment</div>
+          <div class="fw-semibold">{{ selectedApp?.modeOfPayment || '—' }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="small text-muted">Payment Status</div>
+          <div class="fw-semibold">{{ selectedApp?.paymentStatus || '—' }}</div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="small text-muted">Application Date</div>
+          <div class="fw-semibold">
+            {{ selectedApp?.applicationDate | date:'medium' }}
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="small text-muted">Remarks</div>
+          <div class="fw-semibold">{{ selectedApp?.remarks || '—' }}</div>
+        </div>
+
+        <!-- Applicant -->
+        <!-- (unchanged - keep your existing block) -->
+        <!-- Documents -->
+        <!-- (unchanged - keep your existing block) -->
+      </div>
+    </div>
+
+    <div class="app-modal-footer d-flex justify-content-end">
+      <button class="btn btn-outline-secondary me-2" (click)="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Review (remarks) modal ===== -->
+<div
+  class="app-modal-backdrop"
+  *ngIf="showReviewModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="reviewTitle"
+  (click)="cancelReview()"
+>
+  <div class="app-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="app-modal-header">
+      <h5 id="reviewTitle" class="m-0">
+        {{ pendingAction?.status === 'APPROVED' ? 'Approve' : 'Reject' }} Application
+      </h5>
+      <button type="button" class="btn-close" aria-label="Close" (click)="cancelReview()"></button>
+    </div>
+
+    <div class="app-modal-body">
+      <p class="mb-2">
+        Please add short remarks for the applicant (these will be shown in their portal).
+      </p>
+      <textarea
+        class="form-control"
+        rows="4"
+        [(ngModel)]="reviewRemarks"
+        placeholder="E.g., Address proof missing / Please upload clearer photo / All good."
+      ></textarea>
+      <small class="text-muted">Minimum 5 characters.</small>
+    </div>
+
+    <div class="app-modal-footer d-flex justify-content-end">
+      <button class="btn btn-outline-secondary me-2" (click)="cancelReview()">Cancel</button>
+      <button class="btn btn-primary" (click)="submitReview()">Submit</button>
+    </div>
   </div>
 </div>

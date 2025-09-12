@@ -52,7 +52,7 @@
       <div class="row g-3">
 
         <!-- Applicant / Document IDs -->
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
           <label class="form-label">Applicant ID (optional)</label>
           <input type="number" class="form-control" formControlName="applicantId" placeholder="Leave empty to create a new Applicant">
         </div>
@@ -61,7 +61,7 @@
           <label class="form-label">Document ID (optional)</label>
           <input type="number" class="form-control" formControlName="documentId" placeholder="Leave empty if none">
         </div>
-        
+         -->
 
         <!-- Optional file pickers (used only when Document ID is empty) -->
         <div class="col-md-6">
@@ -84,16 +84,26 @@
 
         <!-- UI fields (kept for display/validation; not sent to backend) -->
         <div class="col-md-6">
-          <label class="form-label">Application Number</label>
-          <input type="text" class="form-control" formControlName="applicationNumber" placeholder="Enter unique application number">
-          <small class="text-danger" *ngIf="form.get('applicationNumber')?.touched && form.get('applicationNumber')?.hasError('required')">
-            Application Number is required
-          </small>
+          <label class="form-label"  placeholder="e.g., APP-001">Application Number</label>
+<input type="text"
+       class="form-control"
+       formControlName="applicationNumber"
+       placeholder="Enter unique application number e.g., APP-001 "
+       [readonly]="selectedAction==='permanent'"
+       [ngClass]="{'is-invalid': form.get('applicationNumber')?.touched && form.get('applicationNumber')?.invalid}">
+<small class="text-danger"
+       *ngIf="form.get('applicationNumber')?.touched && form.get('applicationNumber')?.hasError('required')">
+  Application Number is required
+</small>
         </div>
 
         <div class="col-md-6">
           <label class="form-label">Full Name</label>
-          <input type="text" class="form-control" formControlName="applicantName" placeholder="Enter full name">
+          <input type="text" class="form-control"
+       formControlName="applicantName"
+       [readonly]="selectedAction==='permanent'"
+       placeholder="Enter full name">
+
           <small class="text-danger" *ngIf="form.get('applicantName')?.touched && form.get('applicantName')?.hasError('required')">
             Full Name is required
           </small>
@@ -158,10 +168,10 @@
 
         <div class="col-12">
           <label class="form-label">Address</label>
-          <textarea rows="3" class="form-control" formControlName="address" placeholder="Enter address"></textarea>
-          <small class="text-danger" *ngIf="form.get('address')?.touched && form.get('address')?.hasError('required')">
-            Address is required
-          </small>
+          <textarea rows="3" class="form-control"
+          formControlName="address"
+         ></textarea>
+          
           <div class="col-md-4">
     <label class="form-label">State (optional)</label>
     <input class="form-control" formControlName="state" placeholder="State">

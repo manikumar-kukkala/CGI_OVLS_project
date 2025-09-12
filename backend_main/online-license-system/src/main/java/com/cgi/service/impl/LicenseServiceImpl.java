@@ -19,11 +19,11 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     public LicenseServiceImpl(ApplicationRepository applicationRepository,
-                              ApplicantRepository applicantRepository,
-                              DocumentsRepository documentsRepository,
-                              DrivingLicenseRepository drivingLicenseRepository,
-                              AppointmentRepository appointmentRepository,
-                              ChallanRepository challanRepository) {
+            ApplicantRepository applicantRepository,
+            DocumentsRepository documentsRepository,
+            DrivingLicenseRepository drivingLicenseRepository,
+            AppointmentRepository appointmentRepository,
+            ChallanRepository challanRepository) {
         this.applicationRepository = applicationRepository;
         this.applicantRepository = applicantRepository;
         this.documentsRepository = documentsRepository;
@@ -104,16 +104,16 @@ public class LicenseServiceImpl implements LicenseService {
         dl.setLicenseNumber("DL-" + System.currentTimeMillis());
         dl.setApplicant(application.getApplicant());
         dl.setDateOfIssue(new java.util.Date());
-        dl.setValidTill(new java.util.Date(System.currentTimeMillis() + (365L * 24 * 60 * 60 * 1000))); // +1 year validity
+        dl.setValidTill(new java.util.Date(System.currentTimeMillis() + (365L * 24 * 60 * 60 * 1000))); // +1 year
+                                                                                                        // validity
 
         drivingLicenseRepository.save(dl);
         return dl;
     }
 
-	@Override
-	public char[] createApplicant(Applicant applicant) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public char[] createApplicant(Applicant applicant) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
-

@@ -9,9 +9,13 @@ public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
-
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus Astatus;
     @Column(unique = true, nullable = false)
     private String applicationNumber;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "licence_type", nullable = false)
+    private ApplicationType licenceType;
 
     // @Transient
     @Column(name = "applicant_name")
@@ -31,6 +35,9 @@ public class Application {
     @ManyToOne
     @JoinColumn(name = "document_id")
     private Documents documents;
+    @ManyToOne
+    @JoinColumn(name = "rto_office_id")
+    private RTOOffice rtoOffice;
 
     // Constructors
     public Application() {
@@ -65,6 +72,14 @@ public class Application {
 
     public void setApplicationNumber(String applicationNumber) {
         this.applicationNumber = applicationNumber;
+    }
+
+    public ApplicationStatus getApplicationStatus() {
+        return Astatus;
+    }
+
+    public void setApplicationStatus(ApplicationStatus status) {
+        this.Astatus = Astatus;
     }
 
     // public String getApplicantName() {
@@ -135,6 +150,14 @@ public class Application {
         this.status = status;
     }
 
+    public RTOOffice getRtoOffice() {
+        return rtoOffice;
+    }
+
+    public void setRtoOffice(RTOOffice rtoOffice) {
+        this.rtoOffice = rtoOffice;
+    }
+
     public String getApplicantName() {
         // Prefer the stored column value if present
         if (this.applicantName != null && !this.applicantName.isBlank()) {
@@ -161,6 +184,14 @@ public class Application {
                 && applicant != null && applicant.getUser() != null) {
             this.applicantName = applicant.getUser().getName();
         }
+    }
+
+    public ApplicationType getLicenceType() {
+        return licenceType;
+    }
+
+    public void setLicenceType(ApplicationType licenceType) {
+        this.licenceType = licenceType;
     }
 
 }

@@ -68,4 +68,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
                FROM Application a
             """)
     List<LatestStatus> findAllWithApplicantName();
+
+    // ✅ ADD THIS (for applicantId-based search)
+    List<Application> findByApplicantApplicantIdOrderByApplicationDateDesc(Long applicantId);
+
 }

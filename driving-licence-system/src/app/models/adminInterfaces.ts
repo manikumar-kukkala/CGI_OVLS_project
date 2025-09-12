@@ -1,4 +1,5 @@
 import { Status } from "../services/admin.service";
+import { LicenceType } from "./licence.model";
 
 
 export interface RTOOffice{
@@ -7,8 +8,6 @@ export interface RTOOffice{
 }
 export interface RTOOfficer{
     username: string;
-   // rtoOffice:string;
-    //rtoId:Int16Array;
     password: string;
     email: string;
 }
@@ -33,10 +32,28 @@ export interface ApplicationRow {
   applicationId: number;
   applicationNumber?: string;
   applicantName?: string;
-  status: Status | string; // backend may send plain string; we normalize in UI
+  status: Status | string; 
+  modeOfPayment?: string;
+  paymentStatus?: string;
+  applicationDate?: string | Date;
+  remarks?: string;
+ licenceType?: LicenceType;  
+
+
   applicant?: {
+    applicantId?: number;
+    learnerLicenseStatus?: string;   // ✅ add
+    drivingLicenseStatus?: string;   // ✅ add
     user?: { name?: string; email?: string };
     firstName?: string;
+  };
+
+
+  documents?: {
+    documentId?: number;
+    photo?: string;
+    idProof?: string;
+    addressProof?: string;
   };
 }
 
